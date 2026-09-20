@@ -211,7 +211,7 @@ export class Tractor extends Vehicle {
 export class Harvester extends Vehicle {
   constructor() {
     super({ name: 'Aardappelrooier', emoji: '🥔', kind: 'harvester', maxSpeed: 10, accel: 8, turnRate: 1.2, camDist: 18, camHeight: 8 });
-    this.cargo = 0;
+    this.cargo = { potato: 0, wheat: 0, corn: 0 };
     this.capacity = 150;
     const red = mat(0xb5342a);
     const body = shadow(new THREE.Mesh(new THREE.BoxGeometry(2.6, 1.6, 5.2), red));
@@ -257,25 +257,30 @@ export class Harvester extends Vehicle {
     this.addHeadlights(0.7, 3.2, 2.15);
   }
 
+  totalCargo() {
+    return this.cargo.potato + this.cargo.wheat + this.cargo.corn;
+  }
+
   update(dt, input, game) {
     super.update(dt, input, game);
     if (Math.abs(this.speed) > 0.3) this.reel.rotation.x += dt * this.speed * 1.5;
-    // récolte automatique au-dessus du champ
-    if (Math.abs(this.speed) > 0.5 && this.cargo < this.capacity) {
+    // récolte automatique au-dessus des champs (toutes cultures)
+    const EMOJI = { potato: '🥔', wheat: '🌾', corn: '🌽' };
+    if (Math.abs(this.speed) > 0.5 && this.totalCargo() < this.capacity) {
       const p = this.mesh.position;
       for (const plant of game.world.plantData) {
         if (plant.harvested) continue;
         if (Math.hypot(plant.x - p.x, plant.z - p.z) < 3.4) {
           plant.harvested = true;
-          game.hidePlant(plant.index);
-          this.cargo++;
-          game.stats.potatoesHarvested++;
-          game.setPotatoes(game.potatoes + 1);
-          game.toast(`🥔 +1 aardappel (${this.cargo} geladen)`);
+          game.hidePlant(plant);
+          this.cargo[plant.type]++;
+          if (plant.type === 'potato') game.stats.potatoesHarvested++;
+          game.addCrop(plant.type, 1);
+          game.toast(`${EMOJI[plant.type]} +1 (${this.totalCargo()} geladen)`);
         }
       }
     }
-    this.potatoPile.visible = this.cargo > 0;
+    this.potatoPile.visible = this.totalCargo() > 0;
   }
 }
 

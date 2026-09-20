@@ -170,42 +170,69 @@ export function buildWorld(scene) {
   roadSegment(0, -30, -90, -60);
   roadSegment(0, 20, 80, -30);
 
-  // ---------- Champ de pommes de terre ----------
-  const f = SPOTS.potatoField;
-  const fieldGeo = new THREE.PlaneGeometry(f.w, f.d, 24, 18);
-  fieldGeo.rotateX(-Math.PI / 2);
-  const fp = fieldGeo.attributes.position;
-  for (let i = 0; i < fp.count; i++) {
-    fp.setY(i, terrainHeight(f.x + fp.getX(i), f.z + fp.getZ(i)) + 0.05);
-  }
-  fieldGeo.computeVertexNormals();
-  const field = new THREE.Mesh(fieldGeo, mat(0x6d4f2c));
-  field.position.set(f.x, 0, f.z);
-  field.receiveShadow = true;
-  scene.add(field);
-
-  // Plants (instanciés) en rangées
-  const plantGeo = new THREE.ConeGeometry(0.55, 1.1, 6);
-  const plantMat = mat(0x3f7d23);
-  const rows = 9, cols = 24;
-  const count = rows * cols;
-  const plants = new THREE.InstancedMesh(plantGeo, plantMat, count);
-  plants.castShadow = true;
+  // ---------- Champs de cultures (pommes de terre, blé, maïs) ----------
   const m4 = new THREE.Matrix4();
-  let idx = 0;
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const x = f.x - f.w / 2 + 8 + c * ((f.w - 16) / (cols - 1));
-      const z = f.z - f.d / 2 + 8 + r * ((f.d - 16) / (rows - 1));
-      const y = terrainHeight(x, z) + 0.55;
-      m4.makeTranslation(x, y, z);
-      plants.setMatrixAt(idx, m4);
-      world.plantData.push({ x, z, harvested: false, index: idx });
-      idx++;
+  const FIELDS = [
+    { type: 'potato', ...SPOTS.potatoField, rows: 9, cols: 24, soil: 0x6d4f2c, label: 'AARDAPPELEN' },
+    { type: 'wheat', x: -190, z: 30, w: 80, d: 60, rows: 11, cols: 20, soil: 0x7d6a3a, label: 'TARWE' },
+    { type: 'corn', x: 60, z: -115, w: 85, d: 55, rows: 8, cols: 18, soil: 0x6a5230, label: 'MAÏS' },
+  ];
+  const PLANT_SHAPES = {
+    potato: { geo: new THREE.ConeGeometry(0.55, 1.1, 6), color: 0x3f7d23, lift: 0.55 },
+    wheat: { geo: new THREE.ConeGeometry(0.24, 1.5, 5), color: 0xd8b84a, lift: 0.75 },
+    corn: { geo: new THREE.CylinderGeometry(0.16, 0.24, 2.3, 6), color: 0x4e9430, lift: 1.15 },
+  };
+  world.fields = FIELDS;
+  for (const f of FIELDS) {
+    const fieldGeo = new THREE.PlaneGeometry(f.w, f.d, 20, 16);
+    fieldGeo.rotateX(-Math.PI / 2);
+    const fp = fieldGeo.attributes.position;
+    for (let i = 0; i < fp.count; i++) {
+      fp.setY(i, terrainHeight(f.x + fp.getX(i), f.z + fp.getZ(i)) + 0.05);
     }
+    fieldGeo.computeVertexNormals();
+    const field = new THREE.Mesh(fieldGeo, mat(f.soil));
+    field.position.set(f.x, 0, f.z);
+    field.receiveShadow = true;
+    scene.add(field);
+
+    // plants instanciés en rangées
+    const shape = PLANT_SHAPES[f.type];
+    const count = f.rows * f.cols;
+    const plants = new THREE.InstancedMesh(shape.geo, mat(shape.color), count);
+    plants.castShadow = true;
+    let idx = 0;
+    for (let r = 0; r < f.rows; r++) {
+      for (let c = 0; c < f.cols; c++) {
+        const x = f.x - f.w / 2 + 8 + c * ((f.w - 16) / (f.cols - 1));
+        const z = f.z - f.d / 2 + 8 + r * ((f.d - 16) / (f.rows - 1));
+        const y = terrainHeight(x, z) + shape.lift;
+        m4.makeTranslation(x, y, z);
+        plants.setMatrixAt(idx, m4);
+        world.plantData.push({ x, z, type: f.type, harvested: false, mesh: plants, index: idx });
+        idx++;
+      }
+    }
+    scene.add(plants);
+
+    // panneau du champ
+    const c2 = document.createElement('canvas');
+    c2.width = 512; c2.height = 128;
+    const g2 = c2.getContext('2d');
+    g2.fillStyle = '#3a2c18'; g2.fillRect(0, 0, 512, 128);
+    g2.fillStyle = '#ffd97a'; g2.font = 'bold 60px sans-serif'; g2.textAlign = 'center';
+    g2.fillText(f.label, 256, 86);
+    const panel = new THREE.Mesh(
+      new THREE.PlaneGeometry(9, 2.2),
+      new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c2), side: THREE.DoubleSide })
+    );
+    const px = f.x, pz = f.z + f.d / 2 + 4;
+    panel.position.set(px, terrainHeight(px, pz) + 3, pz);
+    scene.add(panel);
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 3, 6), mat(0x6b4a2a));
+    pole.position.set(px, terrainHeight(px, pz) + 1.5, pz);
+    scene.add(pole);
   }
-  scene.add(plants);
-  world.plants = plants;
 
   // ---------- Usine ----------
   const fx = SPOTS.factory.x, fz = SPOTS.factory.z;
@@ -418,7 +445,8 @@ export function buildWorld(scene) {
     if (Math.abs(x) < 12 && z > -40 && z < 100) continue;
     if (Math.hypot(x - fx, z - fz) < 45) continue;
     if (Math.hypot(x - b.x, z - b.z) < 35) continue;
-    if (x > f.x - f.w / 2 - 10 && x < f.x + f.w / 2 + 10 && z > f.z - f.d / 2 - 10 && z < f.z + f.d / 2 + 10) continue;
+    if (FIELDS.some(f => x > f.x - f.w / 2 - 10 && x < f.x + f.w / 2 + 10
+      && z > f.z - f.d / 2 - 10 && z < f.z + f.d / 2 + 10)) continue;
     if (Math.hypot(x - LAKE.x, z - LAKE.z) < LAKE.radius + 18) continue;
     if (Math.hypot(x, z) < 22) continue;
     // pas d'arbres dans les enclos des animaux

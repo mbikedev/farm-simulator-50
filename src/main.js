@@ -35,7 +35,7 @@ const game = {
   world,
   scene,
   money: 500,
-  potatoes: 0,
+  crops: { potato: 0, wheat: 0, corn: 0 },
   materials: 4,
   stats: {
     potatoesHarvested: 0,
@@ -53,14 +53,14 @@ const game = {
   updatables: [],
 
   setMoney(v) { this.money = v; ui.setMoney(v); },
-  setPotatoes(v) { this.potatoes = v; ui.setPotatoes(v); },
+  addCrop(type, delta) { this.crops[type] += delta; ui.setCrops(this.crops); },
   setMaterials(v) { this.materials = v; ui.setMaterials(v); },
   toast,
 
-  hidePlant(index) {
+  hidePlant(plant) {
     const m = new THREE.Matrix4().makeScale(0.001, 0.001, 0.001);
-    world.plants.setMatrixAt(index, m);
-    world.plants.instanceMatrix.needsUpdate = true;
+    plant.mesh.setMatrixAt(plant.index, m);
+    plant.mesh.instanceMatrix.needsUpdate = true;
   },
 
   // --- Pelleteuse : creuser une fondation ---
@@ -349,22 +349,30 @@ function exitVehicle() {
 }
 
 // ---------- Déchargement automatique à l'usine ----------
+const CROP_PRICES = { potato: 2, wheat: 3, corn: 4 };
+const CROP_NAMES = { potato: 'aardappelen', wheat: 'tarwe', corn: 'maïs' };
 let unloadAcc = 0;
 function updateUnloading(dt) {
   const v = game.currentVehicle;
-  if (!v || v.kind !== 'harvester' || v.cargo <= 0) { unloadAcc = 0; return; }
+  if (!v || v.kind !== 'harvester' || v.totalCargo() <= 0) { unloadAcc = 0; return; }
   const uz = SPOTS.unloadZone;
   const p = v.mesh.position;
   if (Math.hypot(p.x - uz.x, p.z - uz.z) > uz.r || Math.abs(v.speed) > 0.8) { unloadAcc = 0; return; }
   unloadAcc += dt * 14;
-  const n = Math.min(Math.floor(unloadAcc), v.cargo);
-  if (n > 0) {
-    unloadAcc -= n;
-    v.cargo -= n;
-    game.stats.potatoesDelivered += n;
-    game.setPotatoes(Math.max(0, game.potatoes - n));
-    game.setMoney(game.money + n * 2);
-    toast(`💶 ${n * 2} € — aardappelen gelost! (nog ${v.cargo})`, 1200);
+  let n = Math.floor(unloadAcc);
+  if (n <= 0) return;
+  unloadAcc -= n;
+  // vendre culture par culture, au prix de chacune
+  for (const type of ['potato', 'wheat', 'corn']) {
+    if (n <= 0) break;
+    const take = Math.min(n, v.cargo[type]);
+    if (take <= 0) continue;
+    n -= take;
+    v.cargo[type] -= take;
+    if (type === 'potato') game.stats.potatoesDelivered += take;
+    game.addCrop(type, -take);
+    game.setMoney(game.money + take * CROP_PRICES[type]);
+    toast(`💶 ${take * CROP_PRICES[type]} € — ${CROP_NAMES[type]} gelost! (nog ${v.totalCargo()})`, 1200);
   }
 }
 
@@ -441,7 +449,7 @@ soundBtn.addEventListener('pointerdown', (e) => {
 });
 
 ui.setMoney(game.money);
-ui.setPotatoes(0);
+ui.setCrops(game.crops);
 ui.setMaterials(game.materials);
 ui.setMission(missionHTML(0));
 

@@ -4,7 +4,7 @@ const el = (id) => document.getElementById(id);
 
 export const ui = {
   setMoney(v) { el('hud-money').textContent = `💶 ${Math.round(v)} €`; },
-  setPotatoes(v) { el('hud-potatoes').textContent = `🥔 ${v}`; },
+  setCrops(c) { el('hud-potatoes').textContent = `🥔 ${c.potato} · 🌾 ${c.wheat} · 🌽 ${c.corn}`; },
   setMaterials(v) { el('hud-materials').textContent = `🧱 ${v}`; },
   setVehicle(name) { el('hud-vehicle').textContent = name; },
   setTime(text) { el('hud-time').textContent = text; },
