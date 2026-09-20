@@ -10,7 +10,7 @@ Jeu de simulation de conduite de tracteurs en 3D — **interface du jeu en néer
 | Véhicule / machine | Nom en jeu | Rôle |
 |---|---|---|
 | 🚜 Tracteur | Tractor | Conduite libre, réaliste (roues crantées, cabine vitrée, garde-boue) |
-| 🥔 Arracheuse de pommes de terre | Aardappelrooier | Récolte automatique dans le champ, trémie qui se remplit |
+| 🥔 Arracheuse | Aardappelrooier | Récolte auto — 🥔 pommes de terre, 🌾 blé, 🌽 maïs — trémie qui se remplit |
 | 🚛 Camion-toupie | Betonmixer | Toupie tournante, coule des dalles de route sur les fondations |
 | 🚧 Pelleteuse | Graafmachine | Chenilles, bras articulé animé, creuse les fondations de routes |
 | 🏗️ Grue à tour | Kraan | Rotation de flèche, chariot, crochet ; charge les caisses (machine de chargement) |
@@ -20,6 +20,8 @@ Jeu de simulation de conduite de tracteurs en 3D — **interface du jeu en néer
   jaune *LOSSEN* (vendre les pommes de terre) et zone bleue *LADEN* (acheter des matériaux).
 - 🔨 **Construction** : maisons, hangars et **tracteurs personnalisés** à assembler soi-même
   (menu *Bouwen*), routes à construire soi-même (pelleteuse → fondation, toupie → béton).
+- 🌾 **Trois cultures** : pommes de terre 🥔, blé 🌾 et maïs 🌽, chacune dans son champ, à
+  récolter et vendre à l'usine à des prix différents (2 / 3 / 4 € l'unité).
 - 🐄 **Animaux vivants** : vaches et moutons dans des enclos clôturés (ils broutent et se
   promènent), poules 🐔 en basse-cour avec poulailler — elles s'enfuient quand on s'approche.
 - 🌙 **Cycle jour/nuit** (journée de 5 min) : soleil orbital, aube et crépuscule colorés,
