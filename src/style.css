@@ -204,6 +204,49 @@ button.hud-pill:active { background: rgba(120,200,90,0.5); }
   border: none; border-radius: 8px; padding: 10px; font-weight: 700;
 }
 
+/* ---------- Tableau des scores ---------- */
+#scoreboard {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(92vw, 440px);
+  max-height: 82vh; overflow-y: auto;
+  background: rgba(18, 26, 18, 0.96);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 16px;
+  padding: 20px;
+  color: #fff;
+  z-index: 20;
+}
+#scoreboard.hidden { display: none; }
+#scoreboard h2 { font-size: 18px; margin-bottom: 6px; }
+
+.score-hero {
+  text-align: center;
+  background: linear-gradient(180deg, rgba(255,217,122,0.18), rgba(255,217,122,0.04));
+  border: 1px solid rgba(255,217,122,0.4);
+  border-radius: 12px;
+  padding: 12px; margin: 10px 0 16px;
+}
+.score-hero .score-total { font-size: 34px; font-weight: 900; color: #ffd97a; line-height: 1; }
+.score-hero .score-label { font-size: 12px; color: #cbe6bf; margin-top: 4px; }
+.score-hero .score-lvl { font-size: 14px; font-weight: 700; margin-top: 8px; color: #aef58a; }
+
+.score-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 4px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  font-size: 14px;
+}
+.score-row .sr-label { color: #d8e6d0; }
+.score-row .sr-value { font-weight: 800; color: #fff; }
+
+#scoreboard-close {
+  width: 100%; margin-top: 14px;
+  background: rgba(255,255,255,0.15); color: #fff;
+  border: none; border-radius: 8px; padding: 10px; font-weight: 700;
+}
+
 /* ---------- Écran titre ---------- */
 #title-screen {
   position: absolute; inset: 0;

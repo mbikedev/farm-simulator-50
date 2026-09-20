@@ -39,6 +39,8 @@ Jeu de simulation de conduite de tracteurs en 3D — **interface du jeu en néer
 - ⭐ **Niveaux & expérience** : gagnez de l'XP en récoltant, vendant, livrant, construisant et
   bâtissant des routes ; montez de niveau (barre d'XP + badge dans le HUD), débloquez des
   titres (Leerling → Boerenkoning) et touchez une prime d'argent à chaque palier.
+- 📊 **Tableau des scores** (bouton 📊 du HUD) : score total (XP cumulée), niveau/titre et
+  toutes les statistiques — récoltes, ventes, argent gagné, caisses, routes, bâtiments, missions.
 - 📋 **6 missions** guidées, économie (💶 argent, 🥔 pommes de terre, 🧱 matériaux).
 - 📱 **Contrôles tactiles** (joystick virtuel + boutons) et clavier (flèches/WASD/ZQSD,
   Espace = action, E = monter/descendre, B = construire).
@@ -58,6 +60,8 @@ Jeu de simulation de conduite de tracteurs en 3D — **interface du jeu en néer
 ![Réseau routier](docs/screenshots/wegen.png)
 
 ![Niveaux & XP](docs/screenshots/niveau.png)
+
+![Tableau des scores](docs/screenshots/scorebord.png)
 
 ## Lancer en développement (navigateur)
 

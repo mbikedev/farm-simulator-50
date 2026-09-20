@@ -19,6 +19,7 @@ export function createProgression(game) {
     level: 1,
     xp: 0,
     xpToNext: 80,
+    totalXP: 0,   // XP cumulée = score global
 
     // XP nécessaire pour passer du niveau L au suivant
     needFor(level) { return Math.round(80 * Math.pow(1.4, level - 1)); },
@@ -28,6 +29,7 @@ export function createProgression(game) {
     add(amount, reason) {
       if (amount <= 0) return;
       this.xp += amount;
+      this.totalXP += amount;
       let leveled = false;
       while (this.xp >= this.xpToNext) {
         this.xp -= this.xpToNext;
@@ -35,6 +37,7 @@ export function createProgression(game) {
         this.xpToNext = this.needFor(this.level);
         const bonus = this.level * 50;
         game.setMoney(game.money + bonus);
+        if (game.stats) game.stats.moneyEarned += bonus;
         toast(`⭐ Niveau ${this.level} — ${this.title()}! +${bonus} €`, 3200);
         leveled = true;
       }

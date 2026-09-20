@@ -3,7 +3,7 @@ import { terrainHeight, isWater, WATER_LEVEL, ISLAND } from './terrain.js';
 import { buildWorld, SPOTS } from './world.js';
 import { buildAnimals } from './animals.js';
 import { Tractor, Harvester, MixerTruck, Excavator, Boat, Crane, buildFarmer } from './vehicles.js';
-import { ui, toast, missions, missionHTML, setupBuildMenu } from './ui.js';
+import { ui, toast, missions, missionHTML, setupBuildMenu, renderScoreboard } from './ui.js';
 import { createControls } from './controls.js';
 import { audio } from './audio.js';
 import { createWeather } from './weather.js';
@@ -47,6 +47,13 @@ const game = {
     roadTiles: 0,
     housesBuilt: 0,
     reachedIsland: false,
+    // stats du tableau des scores
+    cropsHarvested: 0,
+    cropsSold: 0,
+    moneyEarned: 0,
+    shedsBuilt: 0,
+    tractorsBuilt: 0,
+    missionsCompleted: 0,
   },
   vehicles: [],
   currentVehicle: null,
@@ -191,6 +198,7 @@ const game = {
       t.placeOnGround();
       scene.add(t.mesh);
       this.vehicles.push(t);
+      this.stats.tractorsBuilt++;
       this.awardXP(XP.tractor, 'tractor');
       toast('🚜 Nieuwe tractor gebouwd! Stap in met « Instappen ».');
       return true;
@@ -209,6 +217,7 @@ const game = {
       building.scale.setScalar(s);
     });
     if (item.id === 'house') this.stats.housesBuilt++;
+    else this.stats.shedsBuilt++;
     this.awardXP(item.id === 'house' ? XP.house : XP.shed, 'build');
     toast(item.id === 'house' ? '🏠 Huis gebouwd!' : '🛖 Schuur gebouwd!');
     return true;
@@ -377,6 +386,8 @@ function sellCargo(v, dt, priceFn) {
     game.addCrop(type, -take);
     const gain = Math.round(take * priceFn(type));
     game.setMoney(game.money + gain);
+    game.stats.cropsSold += take;
+    game.stats.moneyEarned += gain;
     game.awardXP(take * XP.sell, 'sell');
     toast(`💶 ${gain} € — ${CROP_NAMES[type]} verkocht! (nog ${v.totalCargo()})`, 1200);
   }
@@ -410,6 +421,7 @@ function updateMissions() {
   }
   if (missions[game.missionIndex].check(game)) {
     game.missionIndex++;
+    game.stats.missionsCompleted++;
     game.awardXP(50, 'mission');
     toast('✅ Missie voltooid! +50 XP', 3000);
     ui.setMission(missionHTML(game.missionIndex));
@@ -469,6 +481,22 @@ const soundBtn = document.getElementById('hud-sound');
 soundBtn.addEventListener('pointerdown', (e) => {
   e.preventDefault();
   soundBtn.textContent = audio.toggleMute() ? '🔇' : '🔊';
+});
+
+// tableau des scores
+const scoreboard = document.getElementById('scoreboard');
+document.getElementById('hud-score').addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  if (scoreboard.classList.contains('hidden')) {
+    renderScoreboard(game);
+    scoreboard.classList.remove('hidden');
+  } else {
+    scoreboard.classList.add('hidden');
+  }
+});
+document.getElementById('scoreboard-close').addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  scoreboard.classList.add('hidden');
 });
 
 game.prog = createProgression(game);

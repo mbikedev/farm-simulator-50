@@ -24,6 +24,34 @@ export const ui = {
   setMission(html) { el('hud-mission').innerHTML = html; },
 };
 
+// ---------- Tableau des scores ----------
+export function renderScoreboard(game) {
+  const s = game.stats;
+  const p = game.prog;
+  const rows = [
+    ['🥔 · 🌾 · 🌽 Geoogst', s.cropsHarvested],
+    ['💰 Verkocht', s.cropsSold],
+    ['💶 Verdiend', `${Math.round(s.moneyEarned)} €`],
+    ['🧱 Kratten geleverd', s.crateDeliveries],
+    ['🛣️ Wegtegels', s.roadTiles],
+    ['🏠 Huizen', s.housesBuilt],
+    ['🛖 Schuren', s.shedsBuilt],
+    ['🚜 Tractoren gebouwd', s.tractorsBuilt],
+    ['🛥️ Eiland bereikt', s.reachedIsland ? 'Ja ✅' : 'Nee'],
+    ['📋 Missies voltooid', `${s.missionsCompleted} / 6`],
+  ];
+  el('scoreboard-body').innerHTML = `
+    <div class="score-hero">
+      <div class="score-total">${p.totalXP}</div>
+      <div class="score-label">TOTALE SCORE (XP)</div>
+      <div class="score-lvl">⭐ Niveau ${p.level} — ${p.title()}</div>
+    </div>
+    ${rows.map(([label, value]) => `
+      <div class="score-row"><span class="sr-label">${label}</span><span class="sr-value">${value}</span></div>
+    `).join('')}
+  `;
+}
+
 let toastTimer = null;
 export function toast(msg, duration = 2200) {
   const t = el('hud-toast');
