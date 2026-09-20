@@ -9,9 +9,17 @@ Jeu de simulation de conduite de tracteurs en 3D — **interface du jeu en néer
 
 ### Galerie de présentation
 
+Images générées avec Midjourney à partir des prompts du press kit.
+
 | | |
 |---|---|
 | ![Vue héroïque](docs/screenshots/hero.jpg) | ![Coucher de soleil](docs/screenshots/hero-sunset.jpg) |
+| ![Tracteur au champ](docs/screenshots/tractor-field.jpg) | ![Arracheuse de pommes de terre](docs/screenshots/rooier.jpg) |
+| ![Grange au coucher du soleil](docs/screenshots/schuur-zonsondergang.jpg) | ![Nuit avec phares](docs/screenshots/nacht-echt.jpg) |
+
+<p align="center">
+  <img src="docs/screenshots/boer-portret.jpg" alt="Le fermier" width="45%">
+</p>
 
 ![Ferme (en jeu)](docs/screenshots/boerderij.png)
 
