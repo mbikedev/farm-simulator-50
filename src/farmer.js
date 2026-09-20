@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import farmerUrl from './assets/farmer.glb?url';
+// modèle embarqué en data-URL (le service d'artifacts ne diffuse pas les .glb)
+import farmerUrl from './assets/farmerModel.js';
 
 // Charge le modèle 3D texturé du fermier (statique, sans rig).
 // Renvoie un THREE.Group tout de suite ; le modèle est ajouté au chargement du .glb.
