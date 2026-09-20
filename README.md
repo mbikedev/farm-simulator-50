@@ -5,7 +5,13 @@
 Jeu de simulation de conduite de tracteurs en 3D — **interface du jeu en néerlandais** — conçu pour
 **Android d'abord** (via Capacitor), puis iOS. Jouable aussi directement dans un navigateur.
 
-> Image de présentation générée à partir des prompts du [press kit](docs/presskit.html).
+> Images de présentation générées à partir des prompts du [press kit](docs/presskit.html).
+
+### Galerie de présentation
+
+| | |
+|---|---|
+| ![Vue héroïque](docs/screenshots/hero.jpg) | ![Coucher de soleil](docs/screenshots/hero-sunset.jpg) |
 
 ![Ferme (en jeu)](docs/screenshots/boerderij.png)
 
