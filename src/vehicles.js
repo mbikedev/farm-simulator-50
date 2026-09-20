@@ -276,6 +276,7 @@ export class Harvester extends Vehicle {
           this.cargo[plant.type]++;
           if (plant.type === 'potato') game.stats.potatoesHarvested++;
           game.addCrop(plant.type, 1);
+          game.awardXP(2, 'harvest'); // XP.harvest
           game.toast(`${EMOJI[plant.type]} +1 (${this.totalCargo()} geladen)`);
         }
       }

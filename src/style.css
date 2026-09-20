@@ -40,9 +40,53 @@ button.hud-pill {
 }
 button.hud-pill:active { background: rgba(120,200,90,0.5); }
 
-#hud-mission {
+#hud-level {
   position: absolute;
   top: calc(48px + env(safe-area-inset-top));
+  left: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+#hud-level-badge {
+  background: linear-gradient(180deg, #ffd97a, #e0a83a);
+  color: #4a2c00;
+  font-weight: 800; font-size: 15px;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid rgba(255,255,255,0.6);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  flex-direction: column; line-height: 1;
+}
+#hud-level-info { display: flex; flex-direction: column; gap: 3px; }
+#hud-level-title {
+  color: #ffe9a8; font-size: 12px; font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+}
+#hud-xp-bar {
+  position: relative;
+  width: 150px; height: 14px;
+  background: rgba(0,0,0,0.55);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 8px;
+  overflow: hidden;
+}
+#hud-xp-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, #7ddf5a, #aef58a);
+  transition: width 0.35s ease;
+}
+#hud-xp-text {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.9);
+}
+#hud-xp-bar.flash { animation: xpflash 0.4s; }
+@keyframes xpflash { 0%,100% { box-shadow: none; } 50% { box-shadow: 0 0 10px 2px #aef58a; } }
+
+#hud-mission {
+  position: absolute;
+  top: calc(96px + env(safe-area-inset-top));
   left: 12px;
   max-width: 62vw;
   background: rgba(0, 60, 20, 0.65);

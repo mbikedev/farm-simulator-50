@@ -9,6 +9,18 @@ export const ui = {
   setVehicle(name) { el('hud-vehicle').textContent = name; },
   setTime(text) { el('hud-time').textContent = text; },
   setWeather(text) { el('hud-weather').textContent = text; },
+  setLevel(level, title, xp, xpToNext) {
+    el('hud-level-badge').textContent = `⭐ ${level}`;
+    el('hud-level-title').textContent = title;
+    el('hud-xp-fill').style.width = `${Math.round((xp / xpToNext) * 100)}%`;
+    el('hud-xp-text').textContent = `${xp} / ${xpToNext} XP`;
+  },
+  flashXP() {
+    const bar = el('hud-xp-bar');
+    bar.classList.remove('flash');
+    void bar.offsetWidth; // relance l'animation
+    bar.classList.add('flash');
+  },
   setMission(html) { el('hud-mission').innerHTML = html; },
 };
 

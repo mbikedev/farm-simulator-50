@@ -36,6 +36,9 @@ Jeu de simulation de conduite de tracteurs en 3D — **interface du jeu en néer
 - 🌧️ **Météo dynamique** : alternance aléatoire clair / pluie / brouillard avec transitions
   douces — gouttes qui suivent le joueur, bruit de pluie, nappe de brouillard qui réduit
   la visibilité ; indicateur ☀️/🌧️/🌫️ dans le HUD.
+- ⭐ **Niveaux & expérience** : gagnez de l'XP en récoltant, vendant, livrant, construisant et
+  bâtissant des routes ; montez de niveau (barre d'XP + badge dans le HUD), débloquez des
+  titres (Leerling → Boerenkoning) et touchez une prime d'argent à chaque palier.
 - 📋 **6 missions** guidées, économie (💶 argent, 🥔 pommes de terre, 🧱 matériaux).
 - 📱 **Contrôles tactiles** (joystick virtuel + boutons) et clavier (flèches/WASD/ZQSD,
   Espace = action, E = monter/descendre, B = construire).
@@ -53,6 +56,8 @@ Jeu de simulation de conduite de tracteurs en 3D — **interface du jeu en néer
 ![Marché](docs/screenshots/markt.png)
 
 ![Réseau routier](docs/screenshots/wegen.png)
+
+![Niveaux & XP](docs/screenshots/niveau.png)
 
 ## Lancer en développement (navigateur)
 

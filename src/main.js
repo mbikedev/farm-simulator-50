@@ -8,6 +8,7 @@ import { createControls } from './controls.js';
 import { audio } from './audio.js';
 import { createWeather } from './weather.js';
 import { createMarket } from './market.js';
+import { createProgression, XP } from './progression.js';
 
 // ---------- Rendu ----------
 const canvas = document.getElementById('game-canvas');
@@ -55,6 +56,7 @@ const game = {
   updatables: [],
 
   setMoney(v) { this.money = v; ui.setMoney(v); },
+  awardXP(amount, reason) { this.prog.add(amount, reason); },
   addCrop(type, delta) { this.crops[type] += delta; ui.setCrops(this.crops); },
   setMaterials(v) { this.materials = v; ui.setMaterials(v); },
   toast,
@@ -123,6 +125,7 @@ const game = {
     cell.state = 'road';
     cell.mesh = road;
     this.stats.roadTiles++;
+    this.awardXP(XP.road, 'road');
     toast(`🛣️ Wegtegel gestort! (${this.stats.roadTiles})`);
   },
 
@@ -137,6 +140,7 @@ const game = {
       if (Math.hypot(hookPos.x - drop.x, hookPos.z - drop.z) < drop.r) {
         this.stats.crateDeliveries++;
         this.setMaterials(this.materials + 2);
+        this.awardXP(XP.crate, 'crate');
         toast('🧱 Krat geleverd! +2 materialen');
         // la caisse « repart » sur la pile
         const k = Math.floor(Math.random() * 3);
@@ -187,6 +191,7 @@ const game = {
       t.placeOnGround();
       scene.add(t.mesh);
       this.vehicles.push(t);
+      this.awardXP(XP.tractor, 'tractor');
       toast('🚜 Nieuwe tractor gebouwd! Stap in met « Instappen ».');
       return true;
     }
@@ -204,6 +209,7 @@ const game = {
       building.scale.setScalar(s);
     });
     if (item.id === 'house') this.stats.housesBuilt++;
+    this.awardXP(item.id === 'house' ? XP.house : XP.shed, 'build');
     toast(item.id === 'house' ? '🏠 Huis gebouwd!' : '🛖 Schuur gebouwd!');
     return true;
   },
@@ -371,6 +377,7 @@ function sellCargo(v, dt, priceFn) {
     game.addCrop(type, -take);
     const gain = Math.round(take * priceFn(type));
     game.setMoney(game.money + gain);
+    game.awardXP(take * XP.sell, 'sell');
     toast(`💶 ${gain} € — ${CROP_NAMES[type]} verkocht! (nog ${v.totalCargo()})`, 1200);
   }
 }
@@ -397,12 +404,14 @@ function updateMissions() {
   const v = game.currentVehicle;
   if (v?.kind === 'boat') {
     if (Math.hypot(v.mesh.position.x - ISLAND.x, v.mesh.position.z - ISLAND.z) < 34) {
+      if (!game.stats.reachedIsland) game.awardXP(XP.island, 'island');
       game.stats.reachedIsland = true;
     }
   }
   if (missions[game.missionIndex].check(game)) {
     game.missionIndex++;
-    toast('✅ Missie voltooid!', 3000);
+    game.awardXP(50, 'mission');
+    toast('✅ Missie voltooid! +50 XP', 3000);
     ui.setMission(missionHTML(game.missionIndex));
   }
 }
@@ -462,10 +471,12 @@ soundBtn.addEventListener('pointerdown', (e) => {
   soundBtn.textContent = audio.toggleMute() ? '🔇' : '🔊';
 });
 
+game.prog = createProgression(game);
 ui.setMoney(game.money);
 ui.setCrops(game.crops);
 ui.setMaterials(game.materials);
 ui.setMission(missionHTML(0));
+game.prog.init();
 
 const clock = new THREE.Clock();
 const idleInput = { forward: 0, turn: 0 };
