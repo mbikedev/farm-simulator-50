@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-// modèle embarqué en data-URL (le service d'artifacts ne diffuse pas les .glb)
-import farmerUrl from './assets/farmerModel.js';
+// modèle embarqué en data-URL base64 (le service d'artifacts ne diffuse pas les .glb)
+import farmerData from './assets/farmerModel.js';
 
 // Charge le modèle 3D texturé du fermier (statique, sans rig).
 // Renvoie un THREE.Group tout de suite ; le modèle est ajouté au chargement du .glb.
@@ -9,40 +9,52 @@ import farmerUrl from './assets/farmerModel.js';
 
 const TARGET_HEIGHT = 1.95; // hauteur visée (m)
 
+// Décode le base64 en ArrayBuffer (évite tout fetch, bloqué par la CSP des artifacts)
+function glbBuffer(dataUrl) {
+  const b64 = dataUrl.slice(dataUrl.indexOf(',') + 1);
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes.buffer;
+}
+
 export function createFarmer() {
   const group = new THREE.Group();
   const state = { group, model: null, ready: false, bob: 0 };
 
-  new GLTFLoader().load(
-    farmerUrl,
-    (gltf) => {
-      const model = gltf.scene;
-      deformArms(model);            // rapproche les bras du corps (modèle sans rig)
-      // échelle + pieds au sol + centrage
-      let box = new THREE.Box3().setFromObject(model);
-      const size = box.getSize(new THREE.Vector3());
-      model.scale.setScalar(TARGET_HEIGHT / (size.y || TARGET_HEIGHT));
-      box = new THREE.Box3().setFromObject(model);
-      model.position.y -= box.min.y;
-      const c = box.getCenter(new THREE.Vector3());
-      model.position.x -= c.x;
-      model.position.z -= c.z;
+  const onLoad = (gltf) => {
+    const model = gltf.scene;
+    deformArms(model);            // rapproche les bras du corps (modèle sans rig)
+    // échelle + pieds au sol + centrage
+    let box = new THREE.Box3().setFromObject(model);
+    const size = box.getSize(new THREE.Vector3());
+    model.scale.setScalar(TARGET_HEIGHT / (size.y || TARGET_HEIGHT));
+    box = new THREE.Box3().setFromObject(model);
+    model.position.y -= box.min.y;
+    const c = box.getCenter(new THREE.Vector3());
+    model.position.x -= c.x;
+    model.position.z -= c.z;
 
-      model.traverse((o) => {
-        if (o.isMesh) {
-          o.castShadow = true;
-          o.receiveShadow = true;
-          if (o.material && o.material.map) o.material.map.colorSpace = THREE.SRGBColorSpace;
-        }
-      });
-      group.add(model);
-      state.model = model;
-      state.baseY = model.position.y;
-      state.ready = true;
-    },
-    undefined,
-    (err) => console.warn('Chargement du modèle fermier échoué:', err)
-  );
+    model.traverse((o) => {
+      if (o.isMesh) {
+        o.castShadow = true;
+        o.receiveShadow = true;
+        if (o.material && o.material.map) o.material.map.colorSpace = THREE.SRGBColorSpace;
+      }
+    });
+    group.add(model);
+    state.model = model;
+    state.baseY = model.position.y;
+    state.ready = true;
+  };
+
+  // parse() lit le binaire directement (aucun fetch réseau)
+  try {
+    new GLTFLoader().parse(glbBuffer(farmerData), '', onLoad,
+      (err) => console.warn('Parse du modèle fermier échoué:', err));
+  } catch (err) {
+    console.warn('Décodage du modèle fermier échoué:', err);
+  }
 
   return state;
 }
