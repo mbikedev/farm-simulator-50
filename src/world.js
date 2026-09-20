@@ -170,6 +170,11 @@ export function buildWorld(scene) {
   roadSegment(0, 90, -40, 110);
   roadSegment(0, -30, -90, -60);
   roadSegment(0, 20, 80, -30);
+  // routes goudronnées desservant les champs
+  roadSegment(-90, -60, -118, -48, 6);   // -> champ de pommes de terre (bord nord)
+  roadSegment(-118, -48, -150, -5, 6);   // pommes de terre -> blé
+  roadSegment(-150, -5, -153, 28, 6);    // -> champ de blé (bord est)
+  roadSegment(80, -30, 62, -89, 6);      // chantier -> champ de maïs (bord nord)
 
   // ---------- Champs de cultures (pommes de terre, blé, maïs) ----------
   const m4 = new THREE.Matrix4();

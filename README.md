@@ -21,7 +21,8 @@ Jeu de simulation de conduite de tracteurs en 3D — **interface du jeu en néer
 - 🔨 **Construction** : maisons, hangars et **tracteurs personnalisés** à assembler soi-même
   (menu *Bouwen*), routes à construire soi-même (pelleteuse → fondation, toupie → béton).
 - 🌾 **Trois cultures** : pommes de terre 🥔, blé 🌾 et maïs 🌽, chacune dans son champ, à
-  récolter et vendre à l'usine à prix fixe (2 / 3 / 4 € l'unité).
+  récolter et vendre à l'usine à prix fixe (2 / 3 / 4 € l'unité). **Routes goudronnées**
+  reliant les champs au réseau routier.
 - 🛒 **Marché** (Markt) : stand avec panneau des **prix qui fluctuent** en temps réel
   (flèches de tendance ▲▼). Choisissez de vendre au prix fixe garanti de l'usine, ou de
   tenter le marché quand les cours grimpent.
@@ -50,6 +51,8 @@ Jeu de simulation de conduite de tracteurs en 3D — **interface du jeu en néer
 ![Pluie](docs/screenshots/regen.png)
 
 ![Marché](docs/screenshots/markt.png)
+
+![Réseau routier](docs/screenshots/wegen.png)
 
 ## Lancer en développement (navigateur)
 
