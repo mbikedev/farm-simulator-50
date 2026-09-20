@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { WORLD_SIZE, WATER_LEVEL, LAKE, ISLAND, terrainHeight } from './terrain.js';
 import { PENS } from './animals.js';
+import { MARKET } from './market.js';
 
 // Emplacements clés du monde
 export const SPOTS = {
@@ -453,6 +454,7 @@ export function buildWorld(scene) {
     if (Math.hypot(x - PENS.cows.x, z - PENS.cows.z) < PENS.cows.r + 6) continue;
     if (Math.hypot(x - PENS.sheep.x, z - PENS.sheep.z) < PENS.sheep.r + 6) continue;
     if (Math.hypot(x - PENS.chickens.x, z - PENS.chickens.z) < PENS.chickens.r + 6) continue;
+    if (Math.hypot(x - MARKET.x, z - MARKET.z) < MARKET.r + 6) continue;
     const s = 0.8 + rand() * 0.9;
     m4.makeScale(s, s, s);
     m4.setPosition(x, h + 1.5 * s, z);

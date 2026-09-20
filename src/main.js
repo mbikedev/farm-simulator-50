@@ -7,6 +7,7 @@ import { ui, toast, missions, missionHTML, setupBuildMenu } from './ui.js';
 import { createControls } from './controls.js';
 import { audio } from './audio.js';
 import { createWeather } from './weather.js';
+import { createMarket } from './market.js';
 
 // ---------- Rendu ----------
 const canvas = document.getElementById('game-canvas');
@@ -29,6 +30,7 @@ window.addEventListener('resize', () => {
 const world = buildWorld(scene);
 const animals = buildAnimals(scene);
 const weather = createWeather(scene);
+const market = createMarket(scene);
 
 // ---------- État du jeu ----------
 const game = {
@@ -348,21 +350,17 @@ function exitVehicle() {
   toast('⚓ Leg eerst aan bij een steiger of het strand!');
 }
 
-// ---------- Déchargement automatique à l'usine ----------
+// ---------- Vente : usine (prix fixe) ou marché (prix variable) ----------
 const CROP_PRICES = { potato: 2, wheat: 3, corn: 4 };
 const CROP_NAMES = { potato: 'aardappelen', wheat: 'tarwe', corn: 'maïs' };
 let unloadAcc = 0;
-function updateUnloading(dt) {
-  const v = game.currentVehicle;
-  if (!v || v.kind !== 'harvester' || v.totalCargo() <= 0) { unloadAcc = 0; return; }
-  const uz = SPOTS.unloadZone;
-  const p = v.mesh.position;
-  if (Math.hypot(p.x - uz.x, p.z - uz.z) > uz.r || Math.abs(v.speed) > 0.8) { unloadAcc = 0; return; }
+
+// Vend la cargaison de l'arracheuse dans une zone donnée, au prix fourni par priceFn.
+function sellCargo(v, dt, priceFn) {
   unloadAcc += dt * 14;
   let n = Math.floor(unloadAcc);
   if (n <= 0) return;
   unloadAcc -= n;
-  // vendre culture par culture, au prix de chacune
   for (const type of ['potato', 'wheat', 'corn']) {
     if (n <= 0) break;
     const take = Math.min(n, v.cargo[type]);
@@ -371,8 +369,24 @@ function updateUnloading(dt) {
     v.cargo[type] -= take;
     if (type === 'potato') game.stats.potatoesDelivered += take;
     game.addCrop(type, -take);
-    game.setMoney(game.money + take * CROP_PRICES[type]);
-    toast(`💶 ${take * CROP_PRICES[type]} € — ${CROP_NAMES[type]} gelost! (nog ${v.totalCargo()})`, 1200);
+    const gain = Math.round(take * priceFn(type));
+    game.setMoney(game.money + gain);
+    toast(`💶 ${gain} € — ${CROP_NAMES[type]} verkocht! (nog ${v.totalCargo()})`, 1200);
+  }
+}
+
+function updateSelling(dt) {
+  const v = game.currentVehicle;
+  if (!v || v.kind !== 'harvester' || v.totalCargo() <= 0 || Math.abs(v.speed) > 0.8) { unloadAcc = 0; return; }
+  const p = v.mesh.position;
+  const uz = SPOTS.unloadZone;
+  const mk = market.MARKET;
+  if (Math.hypot(p.x - mk.x, p.z - mk.z) <= mk.r) {
+    sellCargo(v, dt, (type) => market.priceOf(type));         // marché : prix courant
+  } else if (Math.hypot(p.x - uz.x, p.z - uz.z) <= uz.r) {
+    sellCargo(v, dt, (type) => CROP_PRICES[type]);            // usine : prix fixe
+  } else {
+    unloadAcc = 0;
   }
 }
 
@@ -461,6 +475,7 @@ window.__game = game;
 window.__farmer = farmer;
 window.__enterVehicle = enterVehicle;
 window.__weather = weather;
+window.__market = market;
 window.__camera = camera;
 window.__renderer = renderer;
 window.__scene = scene;
@@ -493,7 +508,8 @@ renderer.setAnimationLoop(() => {
       v.setLights(isNight, v === game.currentVehicle);
     }
     updateFarmer(dt);
-    updateUnloading(dt);
+    updateSelling(dt);
+    market.update(dt, focusPos);
     updateMissions();
     animals.update(dt, t, game.currentVehicle ? game.currentVehicle.mesh.position : farmer.position);
     // son du moteur selon le véhicule conduit et son régime
