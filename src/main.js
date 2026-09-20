@@ -11,6 +11,11 @@ import { createWeather } from './weather.js';
 import { createMarket } from './market.js';
 import { createProgression, XP } from './progression.js';
 import { readSave, writeSave, clearSave } from './save.js';
+import titleBg from './assets/titleBg.js';
+
+// image de fond de l'écran-titre (le voile sombre est géré en CSS)
+const titleScreenEl = document.getElementById('title-screen');
+if (titleScreenEl) titleScreenEl.style.backgroundImage = `url(${titleBg})`;
 
 // ---------- Rendu ----------
 const canvas = document.getElementById('game-canvas');
