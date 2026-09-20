@@ -45,6 +45,7 @@ const game = {
   },
   vehicles: [],
   currentVehicle: null,
+  timeOfDay: 0.35, // 0 = minuit, 0.5 = midi (matinée au départ)
   missionIndex: 0,
   roadCells: new Map(),
   updatables: [],
@@ -450,13 +451,26 @@ window.__game = game;
 window.__farmer = farmer;
 window.__enterVehicle = enterVehicle;
 
+const DAY_LENGTH = 300; // durée d'une journée complète en secondes
+let lastClockText = '';
+
 renderer.setAnimationLoop(() => {
   const dt = Math.min(clock.getDelta(), 0.05);
   const t = clock.elapsedTime;
 
+  // cycle jour/nuit (le temps s'écoule dès l'écran titre pour l'ambiance)
+  if (started) game.timeOfDay = (game.timeOfDay + dt / DAY_LENGTH) % 1;
+  const dayFactor = world.updateDayNight(game.timeOfDay);
+  const isNight = dayFactor < 0.35;
+  const hours = Math.floor(game.timeOfDay * 24);
+  const minutes = Math.floor((game.timeOfDay * 24 % 1) * 60);
+  const clockText = `${isNight ? '🌙' : '🕐'} ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+  if (clockText !== lastClockText) { lastClockText = clockText; ui.setTime(clockText); }
+
   if (started) {
     for (const v of game.vehicles) {
       v.update(dt, v === game.currentVehicle ? input : idleInput, game);
+      v.setLights(isNight, v === game.currentVehicle);
     }
     updateFarmer(dt);
     updateUnloading(dt);

@@ -7,6 +7,7 @@ export const ui = {
   setPotatoes(v) { el('hud-potatoes').textContent = `🥔 ${v}`; },
   setMaterials(v) { el('hud-materials').textContent = `🧱 ${v}`; },
   setVehicle(name) { el('hud-vehicle').textContent = name; },
+  setTime(text) { el('hud-time').textContent = text; },
   setMission(html) { el('hud-mission').innerHTML = html; },
 };
 

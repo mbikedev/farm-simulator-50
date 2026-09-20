@@ -51,6 +51,52 @@ export function buildWorld(scene) {
   scene.add(sun);
   world.sun = sun;
 
+  // ---------- Étoiles (visibles la nuit) ----------
+  const starCount = 350;
+  const starPos = new Float32Array(starCount * 3);
+  const starRand = mulberry32(99);
+  for (let i = 0; i < starCount; i++) {
+    const az = starRand() * Math.PI * 2;
+    const el = Math.asin(starRand() * 0.95 + 0.05);
+    const r = 430;
+    starPos[i * 3] = Math.cos(el) * Math.cos(az) * r;
+    starPos[i * 3 + 1] = Math.sin(el) * r;
+    starPos[i * 3 + 2] = Math.cos(el) * Math.sin(az) * r;
+  }
+  const starGeo = new THREE.BufferGeometry();
+  starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+  const starMat = new THREE.PointsMaterial({
+    color: 0xffffff, size: 2.0, sizeAttenuation: false,
+    transparent: true, opacity: 0, fog: false, depthWrite: false,
+  });
+  const stars = new THREE.Points(starGeo, starMat);
+  scene.add(stars);
+
+  // ---------- Cycle jour/nuit ----------
+  const cNightSky = new THREE.Color(0x0a1226);
+  const cDaySky = new THREE.Color(0x87c7ee);
+  const cDuskSky = new THREE.Color(0xe08a4a);
+  const cSunDay = new THREE.Color(0xfff2d0);
+  const cSunLow = new THREE.Color(0xff9a55);
+  const skyTmp = new THREE.Color();
+  // t01 : 0 = minuit, 0.25 = lever, 0.5 = midi, 0.75 = coucher
+  // renvoie le facteur jour (0 = nuit noire, 1 = plein jour)
+  world.updateDayNight = (t01) => {
+    const a = (t01 - 0.25) * Math.PI * 2;
+    const e = Math.sin(a); // élévation du soleil
+    sun.position.set(Math.cos(a) * 160, Math.max(e, -0.2) * 200 + 20, 80);
+    const day = THREE.MathUtils.smoothstep(e, -0.12, 0.3);
+    const dusk = Math.exp(-Math.pow((e - 0.04) / 0.16, 2));
+    sun.intensity = 1.6 * day;
+    sun.color.copy(cSunDay).lerp(cSunLow, 1 - THREE.MathUtils.smoothstep(e, 0.05, 0.5));
+    hemi.intensity = 0.14 + 0.8 * day;
+    skyTmp.copy(cNightSky).lerp(cDaySky, day).lerp(cDuskSky, dusk * 0.55);
+    scene.background.copy(skyTmp);
+    scene.fog.color.copy(skyTmp);
+    starMat.opacity = Math.max(0, 1 - day * 1.6);
+    return day;
+  };
+
   // ---------- Sol ----------
   const segs = 140;
   const groundGeo = new THREE.PlaneGeometry(WORLD_SIZE, WORLD_SIZE, segs, segs);

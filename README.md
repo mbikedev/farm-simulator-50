@@ -22,6 +22,11 @@ Jeu de simulation de conduite de tracteurs en 3D — **interface du jeu en néer
   (menu *Bouwen*), routes à construire soi-même (pelleteuse → fondation, toupie → béton).
 - 🐄 **Animaux vivants** : vaches et moutons dans des enclos clôturés (ils broutent et se
   promènent), poules 🐔 en basse-cour avec poulailler — elles s'enfuient quand on s'approche.
+- 🌙 **Cycle jour/nuit** (journée de 5 min) : soleil orbital, aube et crépuscule colorés,
+  ciel étoilé la nuit, horloge dans le HUD — et **phares** : lampes allumées sur tous les
+  véhicules la nuit, vrais faisceaux lumineux sur le véhicule conduit.
+- 🔊 **Sons synthétisés** (Web Audio, aucun fichier) : moteur lié au régime, meuglements,
+  bêlements, caquètements avec atténuation par distance ; bouton 🔊/🔇 dans le HUD.
 - 📋 **6 missions** guidées, économie (💶 argent, 🥔 pommes de terre, 🧱 matériaux).
 - 📱 **Contrôles tactiles** (joystick virtuel + boutons) et clavier (flèches/WASD/ZQSD,
   Espace = action, E = monter/descendre, B = construire).
@@ -31,6 +36,8 @@ Jeu de simulation de conduite de tracteurs en 3D — **interface du jeu en néer
 | ![Grue](docs/screenshots/kraan.png) | ![Bateau](docs/screenshots/boot-eiland.png) | ![Construction](docs/screenshots/bouwen.png) |
 
 ![Animaux](docs/screenshots/dieren.png)
+
+![Nuit](docs/screenshots/nacht.png)
 
 ## Lancer en développement (navigateur)
 

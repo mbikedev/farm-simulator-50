@@ -50,6 +50,32 @@ export class Vehicle {
     this.speed = 0;
     this.wheels = [];       // { mesh, radius, steer }
     this.time = 0;
+    this.headlightSpots = [];
+    this.lampMat = null;
+  }
+
+  // Phares : lampes à ±lx (visibles de jour, lumineuses de nuit)
+  // + deux vrais projecteurs SpotLight activés seulement sur le véhicule conduit
+  addHeadlights(lx, y, z) {
+    this.lampMat = new THREE.MeshBasicMaterial({ color: 0x8a8a70 });
+    for (const side of lx === 0 ? [0] : [-1, 1]) {
+      const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), this.lampMat);
+      lamp.position.set(side * lx, y, z);
+      this.mesh.add(lamp);
+      const spot = new THREE.SpotLight(0xffeeb0, 0, 55, 0.5, 0.45, 0);
+      spot.position.set(side * lx, y, z);
+      const target = new THREE.Object3D();
+      target.position.set(side * lx * 0.5, Math.max(0, y - 2.5), z + 16);
+      this.mesh.add(target);
+      spot.target = target;
+      this.mesh.add(spot);
+      this.headlightSpots.push(spot);
+    }
+  }
+
+  setLights(night, driven) {
+    if (this.lampMat) this.lampMat.color.setHex(night ? 0xfff8c0 : 0x8a8a70);
+    for (const s of this.headlightSpots) s.intensity = night && driven ? 5 : 0;
   }
 
   setPosition(x, z) {
@@ -170,11 +196,7 @@ export class Tractor extends Vehicle {
     hitch.position.set(0, 0.8, -2.5);
     this.mesh.add(hitch);
     // phares
-    for (const sx of [-0.5, 0.5]) {
-      const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), new THREE.MeshBasicMaterial({ color: 0xfff2b0 }));
-      lamp.position.set(sx, 1.9, 2.56);
-      this.mesh.add(lamp);
-    }
+    this.addHeadlights(0.5, 1.9, 2.56);
     // roues : grandes à l'arrière, directrices à l'avant
     this.addWheel(1.25, 0.7, -1.25, 1.25, -1.4);
     this.addWheel(1.25, 0.7, 1.25, 1.25, -1.4);
@@ -232,6 +254,7 @@ export class Harvester extends Vehicle {
     this.addWheel(1.1, 0.6, 1.5, 1.1, -1.6);
     this.addWheel(0.8, 0.5, -1.3, 0.8, 1.8, true);
     this.addWheel(0.8, 0.5, 1.3, 0.8, 1.8, true);
+    this.addHeadlights(0.7, 3.2, 2.15);
   }
 
   update(dt, input, game) {
@@ -306,6 +329,7 @@ export class MixerTruck extends Vehicle {
     this.addWheel(0.75, 0.5, 1.15, 0.75, -0.6, false, 0x666666);
     this.addWheel(0.75, 0.5, -1.15, 0.75, -2.2, false, 0x666666);
     this.addWheel(0.75, 0.5, 1.15, 0.75, -2.2, false, 0x666666);
+    this.addHeadlights(0.85, 1.7, 3.25);
   }
 
   update(dt, input, game) {
@@ -372,6 +396,7 @@ export class Excavator extends Vehicle {
     this.turret.add(this.boom);
     this.turret.position.y = 1.0;
     this.mesh.add(this.turret);
+    this.addHeadlights(0.9, 1.3, 2.3);
   }
 
   update(dt, input, game) {
@@ -432,6 +457,8 @@ export class Boat extends Vehicle {
     const flag = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 0.45), new THREE.MeshBasicMaterial({ color: 0xff5533, side: THREE.DoubleSide }));
     flag.position.set(0.35, 3.0, -2.6);
     this.mesh.add(flag);
+    // feu de proue
+    this.addHeadlights(0, 1.35, 3.7);
   }
 
   update(dt, input, game) {
