@@ -588,26 +588,152 @@ export class Crane extends Vehicle {
 }
 
 // ============================================================
-// FERMIER (personnage à pied)
+// FERMIER / BÛCHERON (personnage à pied)
 // ============================================================
+
+// Texture de chemise à carreaux (tartan) générée sur canvas
+function plaidTexture() {
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const g = c.getContext('2d');
+  const base = '#8f9488', dark = '#3f463c', line = '#c9cabf', red = '#7a3b30';
+  g.fillStyle = base;
+  g.fillRect(0, 0, 128, 128);
+  const bands = [0, 42, 84];
+  g.globalAlpha = 0.55;
+  for (const b of bands) {
+    g.fillStyle = dark;
+    g.fillRect(b, 0, 22, 128);
+    g.fillRect(0, b, 128, 22);
+  }
+  g.globalAlpha = 0.4;
+  for (const b of bands) {
+    g.fillStyle = dark;
+    g.fillRect(b, 0, 22, 128); // recouvrement -> carreaux plus sombres aux croisements
+  }
+  g.globalAlpha = 0.8;
+  g.strokeStyle = line;
+  g.lineWidth = 2;
+  for (const b of [11, 53, 95]) {
+    g.beginPath(); g.moveTo(b, 0); g.lineTo(b, 128); g.stroke();
+    g.beginPath(); g.moveTo(0, b); g.lineTo(128, b); g.stroke();
+  }
+  g.globalAlpha = 1;
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(2, 2);
+  return tex;
+}
+
+let _plaidMat = null;
+function plaidMaterial() {
+  if (!_plaidMat) _plaidMat = new THREE.MeshLambertMaterial({ map: plaidTexture() });
+  return _plaidMat;
+}
+
 export function buildFarmer() {
   const g = new THREE.Group();
-  const body = shadow(new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.42, 1.0, 10), mat(0x3a6ea8)));
-  body.position.y = 1.0;
-  g.add(body);
-  const head = shadow(new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 10), mat(0xe8b48a)));
-  head.position.y = 1.85;
-  g.add(head);
-  const hat = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.5, 0.12, 12), mat(0xd8b45a));
-  hat.position.y = 2.05;
-  g.add(hat);
-  const hatTop = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.26, 0.25, 12), mat(0xd8b45a));
-  hatTop.position.y = 2.18;
-  g.add(hatTop);
-  for (const sx of [-0.18, 0.18]) {
-    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.55, 8), mat(0x37424c));
-    leg.position.set(sx, 0.28, 0);
+  const skin = mat(0xe4a980);
+  const denim = mat(0x3b4654);
+  const boot = mat(0x2e2117);
+  const hair = mat(0x7a3218);   // roux/auburn
+  const shirt = plaidMaterial();
+
+  // bottes
+  for (const sx of [-0.17, 0.17]) {
+    const b = shadow(new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.22, 0.42), boot));
+    b.position.set(sx, 0.11, 0.05);
+    g.add(b);
+  }
+  // jambes (jean)
+  for (const sx of [-0.17, 0.17]) {
+    const leg = shadow(new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.14, 0.85, 8), denim));
+    leg.position.set(sx, 0.62, 0);
     g.add(leg);
   }
+  // bassin/jean
+  const hips = shadow(new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.35, 0.32), denim));
+  hips.position.y = 1.08;
+  g.add(hips);
+  // ceinture
+  const belt = new THREE.Mesh(new THREE.BoxGeometry(0.54, 0.1, 0.36), mat(0x5a3a1e));
+  belt.position.y = 1.25;
+  g.add(belt);
+  const buckle = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.09, 0.05), mat(0xccb040));
+  buckle.position.set(0, 1.25, 0.19);
+  g.add(buckle);
+
+  // torse (chemise à carreaux)
+  const torso = shadow(new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.3, 0.72, 10), shirt));
+  torso.position.y = 1.68;
+  g.add(torso);
+  const chest = shadow(new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.7, 0.36), shirt));
+  chest.position.y = 1.68;
+  g.add(chest);
+  // liseré de boutons
+  const placket = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.7, 0.02), mat(0x2a2f26));
+  placket.position.set(0, 1.68, 0.185);
+  g.add(placket);
+
+  // bras (manches à carreaux + mains)
+  for (const sx of [-1, 1]) {
+    const arm = shadow(new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.11, 0.68, 8), shirt));
+    arm.position.set(sx * 0.4, 1.7, 0);
+    arm.rotation.z = sx * 0.14;
+    g.add(arm);
+    const hand = new THREE.Mesh(new THREE.SphereGeometry(0.11, 8, 6), skin);
+    hand.position.set(sx * 0.47, 1.33, 0.02);
+    g.add(hand);
+  }
+
+  // cou + tête
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.13, 0.14, 8), skin);
+  neck.position.y = 2.08;
+  g.add(neck);
+  const head = shadow(new THREE.Mesh(new THREE.SphereGeometry(0.27, 14, 12), skin));
+  head.scale.set(1, 1.12, 1.02);
+  head.position.y = 2.33;
+  g.add(head);
+
+  // cheveux : calotte sur le sommet (dégage le front) + houppe
+  const hairCap = new THREE.Mesh(new THREE.SphereGeometry(0.3, 14, 12, 0, Math.PI * 2, 0, Math.PI * 0.42), hair);
+  hairCap.scale.set(1, 1.1, 1.04);
+  hairCap.position.y = 2.4;
+  g.add(hairCap);
+  const quiff = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.11, 0.12), hair);
+  quiff.position.set(0, 2.56, 0.16);
+  quiff.rotation.x = -0.5;
+  g.add(quiff);
+  // pattes/tempes
+  for (const sx of [-1, 1]) {
+    const sideburn = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.22, 0.12), hair);
+    sideburn.position.set(sx * 0.255, 2.34, 0.06);
+    g.add(sideburn);
+  }
+
+  // moustache (bien visible sous le nez)
+  const stache = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.07, 0.08), hair);
+  stache.position.set(0, 2.22, 0.25);
+  g.add(stache);
+  for (const sx of [-1, 1]) {
+    const tip = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.1, 0.07), hair);
+    tip.position.set(sx * 0.13, 2.19, 0.245);
+    g.add(tip);
+  }
+  // nez
+  const nose = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.1, 0.07), skin);
+  nose.position.set(0, 2.3, 0.27);
+  g.add(nose);
+
+  // yeux + sourcils (au-dessus de la moustache, sous le front dégagé)
+  for (const sx of [-1, 1]) {
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.032, 8, 6), mat(0x2a2018));
+    eye.position.set(sx * 0.1, 2.37, 0.255);
+    g.add(eye);
+    const brow = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.028, 0.04), hair);
+    brow.position.set(sx * 0.1, 2.42, 0.255);
+    g.add(brow);
+  }
+
   return g;
 }

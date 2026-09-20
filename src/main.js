@@ -461,6 +461,9 @@ window.__game = game;
 window.__farmer = farmer;
 window.__enterVehicle = enterVehicle;
 window.__weather = weather;
+window.__camera = camera;
+window.__renderer = renderer;
+window.__scene = scene;
 
 const DAY_LENGTH = 300; // durée d'une journée complète en secondes
 let lastClockText = '';
