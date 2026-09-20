@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { WORLD_SIZE, WATER_LEVEL, LAKE, ISLAND, terrainHeight } from './terrain.js';
+import { PENS } from './animals.js';
 
 // Emplacements clés du monde
 export const SPOTS = {
@@ -373,6 +374,10 @@ export function buildWorld(scene) {
     if (x > f.x - f.w / 2 - 10 && x < f.x + f.w / 2 + 10 && z > f.z - f.d / 2 - 10 && z < f.z + f.d / 2 + 10) continue;
     if (Math.hypot(x - LAKE.x, z - LAKE.z) < LAKE.radius + 18) continue;
     if (Math.hypot(x, z) < 22) continue;
+    // pas d'arbres dans les enclos des animaux
+    if (Math.hypot(x - PENS.cows.x, z - PENS.cows.z) < PENS.cows.r + 6) continue;
+    if (Math.hypot(x - PENS.sheep.x, z - PENS.sheep.z) < PENS.sheep.r + 6) continue;
+    if (Math.hypot(x - PENS.chickens.x, z - PENS.chickens.z) < PENS.chickens.r + 6) continue;
     const s = 0.8 + rand() * 0.9;
     m4.makeScale(s, s, s);
     m4.setPosition(x, h + 1.5 * s, z);

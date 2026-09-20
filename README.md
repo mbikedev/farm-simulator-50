@@ -20,6 +20,8 @@ Jeu de simulation de conduite de tracteurs en 3D — **interface du jeu en néer
   jaune *LOSSEN* (vendre les pommes de terre) et zone bleue *LADEN* (acheter des matériaux).
 - 🔨 **Construction** : maisons, hangars et **tracteurs personnalisés** à assembler soi-même
   (menu *Bouwen*), routes à construire soi-même (pelleteuse → fondation, toupie → béton).
+- 🐄 **Animaux vivants** : vaches et moutons dans des enclos clôturés (ils broutent et se
+  promènent), poules 🐔 en basse-cour avec poulailler — elles s'enfuient quand on s'approche.
 - 📋 **6 missions** guidées, économie (💶 argent, 🥔 pommes de terre, 🧱 matériaux).
 - 📱 **Contrôles tactiles** (joystick virtuel + boutons) et clavier (flèches/WASD/ZQSD,
   Espace = action, E = monter/descendre, B = construire).
@@ -27,6 +29,8 @@ Jeu de simulation de conduite de tracteurs en 3D — **interface du jeu en néer
 | | | |
 |---|---|---|
 | ![Grue](docs/screenshots/kraan.png) | ![Bateau](docs/screenshots/boot-eiland.png) | ![Construction](docs/screenshots/bouwen.png) |
+
+![Animaux](docs/screenshots/dieren.png)
 
 ## Lancer en développement (navigateur)
 

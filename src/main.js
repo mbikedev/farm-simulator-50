@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { terrainHeight, isWater, WATER_LEVEL, ISLAND } from './terrain.js';
 import { buildWorld, SPOTS } from './world.js';
+import { buildAnimals } from './animals.js';
 import { Tractor, Harvester, MixerTruck, Excavator, Boat, Crane, buildFarmer } from './vehicles.js';
 import { ui, toast, missions, missionHTML, setupBuildMenu } from './ui.js';
 import { createControls } from './controls.js';
@@ -24,6 +25,7 @@ window.addEventListener('resize', () => {
 
 // ---------- Monde ----------
 const world = buildWorld(scene);
+const animals = buildAnimals(scene);
 
 // ---------- État du jeu ----------
 const game = {
@@ -449,6 +451,7 @@ renderer.setAnimationLoop(() => {
     updateFarmer(dt);
     updateUnloading(dt);
     updateMissions();
+    animals.update(dt, t, game.currentVehicle ? game.currentVehicle.mesh.position : farmer.position);
   }
   for (const fn of world.updatables) fn(t);
   for (const fn of game.updatables) fn(dt);
