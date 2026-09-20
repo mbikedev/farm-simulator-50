@@ -10,6 +10,7 @@ import { audio } from './audio.js';
 import { createWeather } from './weather.js';
 import { createMarket } from './market.js';
 import { createProgression, XP } from './progression.js';
+import { readSave, writeSave, clearSave } from './save.js';
 
 // ---------- Rendu ----------
 const canvas = document.getElementById('game-canvas');
@@ -61,6 +62,8 @@ const game = {
   timeOfDay: 0.35, // 0 = minuit, 0.5 = midi (matinée au départ)
   missionIndex: 0,
   roadCells: new Map(),
+  buildings: [],       // {type, x, z, rotY} pour la sauvegarde
+  builtTractors: [],   // {x, z, heading, color} pour la sauvegarde
   updatables: [],
 
   setMoney(v) { this.money = v; ui.setMoney(v); },
@@ -89,15 +92,40 @@ const game = {
       toast(cell.state === 'road' ? '🛣️ Hier ligt al een weg.' : '🪏 Hier ligt al een fundering.');
       return;
     }
-    const mesh = new THREE.Mesh(
-      new THREE.BoxGeometry(5.7, 0.25, 5.7),
-      new THREE.MeshLambertMaterial({ color: 0x7a5c36 })
-    );
-    mesh.position.set(cx, terrainHeight(cx, cz) + 0.12, cz);
-    mesh.receiveShadow = true;
-    scene.add(mesh);
-    this.roadCells.set(key, { state: 'foundation', mesh });
+    this.setRoadCell(i, j, 'foundation');
     toast('🪏 Fundering klaar! Stort nu beton met de betonmixer.');
+  },
+
+  // Crée/retire les meshes d'une case (fondation ou route) — réutilisé au chargement
+  setRoadCell(i, j, state) {
+    const cx = i * 6, cz = j * 6;
+    const existing = this.roadCells.get(`${i},${j}`);
+    if (existing) scene.remove(existing.mesh);
+    let mesh;
+    if (state === 'foundation') {
+      mesh = new THREE.Mesh(
+        new THREE.BoxGeometry(5.7, 0.25, 5.7),
+        new THREE.MeshLambertMaterial({ color: 0x7a5c36 })
+      );
+      mesh.position.set(cx, terrainHeight(cx, cz) + 0.12, cz);
+      mesh.receiveShadow = true;
+    } else {
+      mesh = new THREE.Group();
+      const slab = new THREE.Mesh(
+        new THREE.BoxGeometry(5.9, 0.22, 5.9),
+        new THREE.MeshLambertMaterial({ color: 0x46464c })
+      );
+      slab.receiveShadow = true;
+      mesh.add(slab);
+      const stripe = new THREE.Mesh(
+        new THREE.BoxGeometry(0.4, 0.24, 3.4),
+        new THREE.MeshLambertMaterial({ color: 0xdddccc })
+      );
+      mesh.add(stripe);
+      mesh.position.set(cx, terrainHeight(cx, cz) + 0.14, cz);
+    }
+    scene.add(mesh);
+    this.roadCells.set(`${i},${j}`, { state, mesh });
   },
 
   // --- Camion-toupie : couler une dalle de route ---
@@ -114,24 +142,7 @@ const game = {
       return;
     }
     this.setMaterials(this.materials - 1);
-    scene.remove(cell.mesh);
-    const cx = i * 6, cz = j * 6;
-    const road = new THREE.Group();
-    const slab = new THREE.Mesh(
-      new THREE.BoxGeometry(5.9, 0.22, 5.9),
-      new THREE.MeshLambertMaterial({ color: 0x46464c })
-    );
-    slab.receiveShadow = true;
-    road.add(slab);
-    const stripe = new THREE.Mesh(
-      new THREE.BoxGeometry(0.4, 0.24, 3.4),
-      new THREE.MeshLambertMaterial({ color: 0xdddccc })
-    );
-    road.add(stripe);
-    road.position.set(cx, terrainHeight(cx, cz) + 0.14, cz);
-    scene.add(road);
-    cell.state = 'road';
-    cell.mesh = road;
+    this.setRoadCell(i, j, 'road');
     this.stats.roadTiles++;
     this.awardXP(XP.road, 'road');
     toast(`🛣️ Wegtegel gestort! (${this.stats.roadTiles})`);
@@ -192,35 +203,91 @@ const game = {
 
     if (item.id === 'tractor') {
       const palette = [0xd8262c, 0x2e7d32, 0x1565c0, 0xef6c00, 0x6a1b9a, 0x00897b];
-      const t = new Tractor(palette[Math.floor(Math.random() * palette.length)]);
-      t.name = 'Eigen tractor';
-      t.setPosition(bx, bz);
-      t.heading = heading;
-      t.placeOnGround();
-      scene.add(t.mesh);
-      this.vehicles.push(t);
+      const color = palette[Math.floor(Math.random() * palette.length)];
+      this.spawnTractor(bx, bz, heading, color);
+      this.builtTractors.push({ x: bx, z: bz, heading, color });
       this.stats.tractorsBuilt++;
       this.awardXP(XP.tractor, 'tractor');
       toast('🚜 Nieuwe tractor gebouwd! Stap in met « Instappen ».');
       return true;
     }
 
-    const building = item.id === 'house' ? buildHouse() : buildShed();
-    building.position.set(bx, terrainHeight(bx, bz), bz);
-    building.rotation.y = heading + Math.PI;
-    building.scale.setScalar(0.05);
-    scene.add(building);
-    let t0 = 0;
-    this.updatables.push((dt) => {
-      if (t0 >= 1) return;
-      t0 = Math.min(1, t0 + dt);
-      const s = 0.05 + (1 - Math.pow(1 - t0, 3)) * 0.95;
-      building.scale.setScalar(s);
-    });
+    this.spawnBuilding(item.id, bx, bz, heading + Math.PI, true);
+    this.buildings.push({ type: item.id, x: bx, z: bz, rotY: heading + Math.PI });
     if (item.id === 'house') this.stats.housesBuilt++;
     else this.stats.shedsBuilt++;
     this.awardXP(item.id === 'house' ? XP.house : XP.shed, 'build');
     toast(item.id === 'house' ? '🏠 Huis gebouwd!' : '🛖 Schuur gebouwd!');
+    return true;
+  },
+
+  // Crée un bâtiment (avec ou sans animation d'apparition) — réutilisé au chargement
+  spawnBuilding(type, x, z, rotY, animate) {
+    const building = type === 'house' ? buildHouse() : buildShed();
+    building.position.set(x, terrainHeight(x, z), z);
+    building.rotation.y = rotY;
+    if (animate) {
+      building.scale.setScalar(0.05);
+      let t0 = 0;
+      this.updatables.push((dt) => {
+        if (t0 >= 1) return;
+        t0 = Math.min(1, t0 + dt);
+        building.scale.setScalar(0.05 + (1 - Math.pow(1 - t0, 3)) * 0.95);
+      });
+    }
+    scene.add(building);
+    return building;
+  },
+
+  // Crée un tracteur constructible — réutilisé au chargement
+  spawnTractor(x, z, heading, color) {
+    const t = new Tractor(color);
+    t.name = 'Eigen tractor';
+    t.setPosition(x, z);
+    t.heading = heading;
+    t.placeOnGround();
+    scene.add(t.mesh);
+    this.vehicles.push(t);
+    return t;
+  },
+
+  // --- Sauvegarde ---
+  serialize() {
+    return {
+      money: this.money, materials: this.materials, crops: this.crops,
+      timeOfDay: this.timeOfDay, missionIndex: this.missionIndex,
+      stats: this.stats,
+      prog: { level: this.prog.level, xp: this.prog.xp, xpToNext: this.prog.xpToNext, totalXP: this.prog.totalXP },
+      buildings: this.buildings,
+      builtTractors: this.builtTractors,
+      roads: [...this.roadCells.entries()].map(([k, v]) => {
+        const [i, j] = k.split(',').map(Number); return { i, j, state: v.state };
+      }),
+    };
+  },
+
+  save() { writeSave(this.serialize()); },
+
+  load() {
+    const d = readSave();
+    if (!d) return false;
+    this.money = d.money ?? this.money;
+    this.materials = d.materials ?? this.materials;
+    this.crops = d.crops ?? this.crops;
+    this.timeOfDay = d.timeOfDay ?? this.timeOfDay;
+    this.missionIndex = d.missionIndex ?? 0;
+    Object.assign(this.stats, d.stats || {});
+    if (d.prog) {
+      this.prog.level = d.prog.level; this.prog.xp = d.prog.xp;
+      this.prog.xpToNext = d.prog.xpToNext; this.prog.totalXP = d.prog.totalXP || 0;
+    }
+    for (const b of d.buildings || []) { this.spawnBuilding(b.type, b.x, b.z, b.rotY, false); this.buildings.push(b); }
+    for (const t of d.builtTractors || []) { this.spawnTractor(t.x, t.z, t.heading, t.color); this.builtTractors.push(t); }
+    for (const r of d.roads || []) this.setRoadCell(r.i, r.j, r.state);
+    // rafraîchir le HUD
+    ui.setMoney(this.money); ui.setCrops(this.crops); ui.setMaterials(this.materials);
+    ui.setMission(missionHTML(this.missionIndex));
+    ui.setLevel(this.prog.level, this.prog.title(), this.prog.xp, this.prog.xpToNext);
     return true;
   },
 };
@@ -475,6 +542,7 @@ document.getElementById('btn-start').addEventListener('pointerdown', () => {
   document.getElementById('title-screen').style.display = 'none';
   started = true;
   audio.unlock(); // l'audio doit démarrer sur un geste utilisateur
+  if (hasSave) toast('📂 Voortgang geladen', 2600);
 });
 // certains navigateurs suspendent l'audio jusqu'au premier geste sur la page
 window.addEventListener('pointerdown', () => { if (started) audio.unlock(); });
@@ -507,6 +575,21 @@ ui.setCrops(game.crops);
 ui.setMaterials(game.materials);
 ui.setMission(missionHTML(0));
 game.prog.init();
+
+// charger la sauvegarde éventuelle
+const hasSave = game.load();
+
+// autosauvegarde périodique + à la fermeture de la page
+setInterval(() => { if (started) game.save(); }, 15000);
+window.addEventListener('beforeunload', () => { if (started) game.save(); });
+
+// bouton « Nouvelle partie » (réinitialise la sauvegarde)
+const btnNew = document.getElementById('btn-newgame');
+if (btnNew) btnNew.addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  clearSave();
+  location.reload();
+});
 
 const clock = new THREE.Clock();
 const idleInput = { forward: 0, turn: 0 };

@@ -242,10 +242,16 @@ button.hud-pill:active { background: rgba(120,200,90,0.5); }
 .score-row .sr-value { font-weight: 800; color: #fff; }
 
 #scoreboard-close {
-  width: 100%; margin-top: 14px;
+  width: 100%; margin-top: 8px;
   background: rgba(255,255,255,0.15); color: #fff;
   border: none; border-radius: 8px; padding: 10px; font-weight: 700;
 }
+#btn-newgame {
+  width: 100%; margin-top: 14px;
+  background: rgba(200,80,60,0.35); color: #ffd9d0;
+  border: 1px solid rgba(255,120,100,0.5); border-radius: 8px; padding: 9px; font-weight: 700;
+}
+#btn-newgame:active { background: rgba(200,80,60,0.6); }
 
 /* ---------- Écran titre ---------- */
 #title-screen {
