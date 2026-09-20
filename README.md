@@ -1,6 +1,6 @@
-# 🚜 Boerderij Simulator 50
+# 🚜 Alioune Boerderij Donk
 
-![Boerderij Simulator 50](docs/screenshots/hero.jpg)
+![Alioune Boerderij Donk](docs/screenshots/hero.jpg)
 
 Jeu de simulation de conduite de tracteurs en 3D — **interface du jeu en néerlandais** — conçu pour
 **Android d'abord** (via Capacitor), puis iOS. Jouable aussi directement dans un navigateur.
@@ -136,5 +136,5 @@ Modèles importés dans la scène de jeu, sous licence [CC-BY 3.0](https://creat
 Le rendu (matériaux PBR, éclairage d'environnement, tone mapping ACES, bloom) et
 les autres objets sont réalisés dans le moteur.
 
-> ℹ️ Le jeu s'appelle *Boerderij Simulator 50* (« Farming Simulator » est une
+> ℹ️ Le jeu s'appelle *Alioune Boerderij Donk* (« Farming Simulator » est une
 > marque de GIANTS Software, d'où ce nom distinct).
