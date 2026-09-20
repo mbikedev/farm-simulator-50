@@ -669,44 +669,10 @@ function faceTexture() {
   x.beginPath(); x.ellipse(faceCx - 36, faceCy - 4, 12, 26, 0, 0, Math.PI * 2); x.fill();
   x.beginPath(); x.ellipse(faceCx + 36, faceCy - 4, 12, 26, 0, 0, Math.PI * 2); x.fill();
 
-  // barbe fournie (mâchoire + menton, remonte sur les joues)
-  const beard = '#6f4a22', beardHi = '#8f6432';
-  x.fillStyle = beard;
-  x.beginPath();
-  x.moveTo(faceCx - 46, faceCy - 8);
-  x.quadraticCurveTo(faceCx - 48, faceCy + 52, faceCx - 20, faceCy + 74);
-  x.quadraticCurveTo(faceCx, faceCy + 86, faceCx + 20, faceCy + 74);
-  x.quadraticCurveTo(faceCx + 48, faceCy + 52, faceCx + 46, faceCy - 8);
-  // bord supérieur : remonte sur les joues, laisse le milieu (bouche) sous la moustache
-  x.quadraticCurveTo(faceCx + 40, faceCy + 14, faceCx + 22, faceCy + 26);
-  x.quadraticCurveTo(faceCx, faceCy + 22, faceCx - 22, faceCy + 26);
-  x.quadraticCurveTo(faceCx - 40, faceCy + 14, faceCx - 46, faceCy - 8);
-  x.fill();
-  // mèches claires de la barbe (volume)
-  x.strokeStyle = beardHi; x.lineWidth = 1.4;
-  for (let i = -6; i <= 6; i++) {
-    x.beginPath();
-    x.moveTo(faceCx + i * 5.5, faceCy + 34);
-    x.lineTo(faceCx + i * 6.5, faceCy + 68);
-    x.stroke();
-  }
+  // joues nettes (pas de barbe) : légère ombre de mâchoire seulement
+  x.fillStyle = 'rgba(90,58,34,0.18)';
+  x.beginPath(); x.ellipse(faceCx, faceCy + 48, 30, 20, 0, 0, Math.PI * 2); x.fill();
   x.restore();
-
-  // prolongement de la barbe sous le menton (barbe longue, hors de l'ovale)
-  x.fillStyle = beard;
-  x.beginPath();
-  x.moveTo(faceCx - 28, faceCy + 58);
-  x.quadraticCurveTo(faceCx - 24, faceCy + 104, faceCx, faceCy + 122);
-  x.quadraticCurveTo(faceCx + 24, faceCy + 104, faceCx + 28, faceCy + 58);
-  x.quadraticCurveTo(faceCx, faceCy + 80, faceCx - 28, faceCy + 58);
-  x.fill();
-  x.strokeStyle = beardHi; x.lineWidth = 1.3;
-  for (let i = -3; i <= 3; i++) {
-    x.beginPath();
-    x.moveTo(faceCx + i * 7, faceCy + 68);
-    x.lineTo(faceCx + i * 4.5, faceCy + 114);
-    x.stroke();
-  }
 
   // implantation des cheveux (front + houppe)
   x.fillStyle = hairCol;
@@ -753,29 +719,33 @@ function faceTexture() {
   x.fillStyle = 'rgba(200,150,105,0.5)';
   x.beginPath(); x.ellipse(faceCx, faceCy + 14, 4, 6, 0, 0, Math.PI * 2); x.fill(); // pointe éclairée
 
-  // moustache (guidon) sous le nez, reliée à la barbe
-  x.fillStyle = '#6f4a22';
+  // grosse moustache en guidon (sombre, pointes recourbées) — comme la référence
+  const stacheCol = '#3a2414', stacheHi = '#5a3a1e';
+  x.fillStyle = stacheCol;
   x.beginPath();
-  x.moveTo(faceCx, faceCy + 24);
-  x.quadraticCurveTo(faceCx - 16, faceCy + 22, faceCx - 26, faceCy + 26);
-  x.quadraticCurveTo(faceCx - 38, faceCy + 30, faceCx - 40, faceCy + 20); // pointe G recourbée vers le haut
-  x.quadraticCurveTo(faceCx - 30, faceCy + 34, faceCx, faceCy + 34);      // bas de l'aile G
-  x.quadraticCurveTo(faceCx + 30, faceCy + 34, faceCx + 40, faceCy + 20); // aile D + pointe
-  x.quadraticCurveTo(faceCx + 38, faceCy + 30, faceCx + 26, faceCy + 26);
-  x.quadraticCurveTo(faceCx + 16, faceCy + 22, faceCx, faceCy + 24);
+  x.moveTo(faceCx, faceCy + 22);
+  // aile gauche large qui remonte en pointe
+  x.quadraticCurveTo(faceCx - 18, faceCy + 20, faceCx - 32, faceCy + 24);
+  x.quadraticCurveTo(faceCx - 48, faceCy + 28, faceCx - 50, faceCy + 12); // pointe G recourbée vers le haut
+  x.quadraticCurveTo(faceCx - 46, faceCy + 24, faceCx - 34, faceCy + 36);
+  x.quadraticCurveTo(faceCx - 18, faceCy + 40, faceCx, faceCy + 38);      // bas
+  x.quadraticCurveTo(faceCx + 18, faceCy + 40, faceCx + 34, faceCy + 36);
+  x.quadraticCurveTo(faceCx + 46, faceCy + 24, faceCx + 50, faceCy + 12); // pointe D
+  x.quadraticCurveTo(faceCx + 48, faceCy + 28, faceCx + 32, faceCy + 24);
+  x.quadraticCurveTo(faceCx + 18, faceCy + 20, faceCx, faceCy + 22);
   x.fill();
   // reflets/mèches de la moustache
-  x.strokeStyle = hairDark; x.lineWidth = 1.5;
-  for (let i = -3; i <= 3; i++) {
+  x.strokeStyle = stacheHi; x.lineWidth = 1.3;
+  for (let i = -5; i <= 5; i++) {
     x.beginPath();
-    x.moveTo(faceCx + i * 5, faceCy + 25);
-    x.lineTo(faceCx + i * 6.5, faceCy + 32);
+    x.moveTo(faceCx + i * 4.5, faceCy + 24);
+    x.lineTo(faceCx + i * 7.5, faceCy + 32);
     x.stroke();
   }
 
-  // bouche (entre moustache et barbe)
-  x.strokeStyle = '#8a4638'; x.lineWidth = 3;
-  x.beginPath(); x.moveTo(faceCx - 10, faceCy + 39); x.quadraticCurveTo(faceCx, faceCy + 43, faceCx + 10, faceCy + 39); x.stroke();
+  // bouche (lèvres sur peau nette, sous la moustache)
+  x.strokeStyle = '#7a3f30'; x.lineWidth = 3; x.lineCap = 'round';
+  x.beginPath(); x.moveTo(faceCx - 11, faceCy + 46); x.quadraticCurveTo(faceCx, faceCy + 50, faceCx + 11, faceCy + 46); x.stroke();
 
   const tex = new THREE.CanvasTexture(c);
   _faceTex = tex;
@@ -870,13 +840,5 @@ export function buildFarmer() {
     ear.position.set(sx * 0.27, 2.33, 0.02);
     g.add(ear);
   }
-  // barbe longue en relief : pend sous le menton
-  const beardMat = mat(0x6f4a22);
-  const beardTip = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.34, 10), beardMat);
-  beardTip.rotation.x = Math.PI;        // pointe vers le bas
-  beardTip.scale.set(1.15, 1, 0.75);
-  beardTip.position.set(0, 2.0, 0.16);
-  g.add(beardTip);
-
   return g;
 }
