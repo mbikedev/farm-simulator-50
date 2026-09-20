@@ -130,6 +130,8 @@ Modèles importés dans la scène de jeu, sous licence [CC-BY 3.0](https://creat
 - 🐄 **Cow** — *Poly by Google*, via [Poly Pizza](https://poly.pizza/m/0OToIgkcVM7)
 - 🐑 **Sheep** — *Poly by Google*, via [Poly Pizza](https://poly.pizza/m/dXBMV4AY2DL)
 - 🐔 **Rooster** — *Poly by Google*, via [Poly Pizza](https://poly.pizza/m/6NTegstc5Jy)
+- 🛖 **Cabin** (grange) — *Poly by Google*, via [Poly Pizza](https://poly.pizza/m/dTSrDa0oz0a)
+- 🏠 **House with driveway** — *Poly by Google*, via [Poly Pizza](https://poly.pizza/m/bnZkUs4qEdG)
 
 Le rendu (matériaux PBR, éclairage d'environnement, tone mapping ACES, bloom) et
 les autres objets sont réalisés dans le moteur.

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { WORLD_SIZE, WATER_LEVEL, LAKE, ISLAND, terrainHeight } from './terrain.js';
 import { PENS } from './animals.js';
 import { MARKET } from './market.js';
-import { loadModel, normalizeModel } from './models.js';
+import { loadModel, normalizeModel, attachModel } from './models.js';
 
 // Emplacements clés du monde
 export const SPOTS = {
@@ -536,6 +536,8 @@ export function buildWorld(scene) {
   barn.position.set(-25, terrainHeight(-25, -20), -20);
   barn.rotation.y = 0.4;
   scene.add(barn);
+  // Remplace par le vrai modèle 3D (public/models/barn.glb) si présent
+  attachModel(barn, 'barn');
 
   return world;
 }

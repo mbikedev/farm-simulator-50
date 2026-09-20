@@ -42,6 +42,17 @@ export function loadModel(name) {
   return p;
 }
 
+// Remplace le contenu d'un groupe par un vrai modèle .glb (si présent), en
+// conservant la position/rotation/échelle du groupe. Garde le mesh codé sinon.
+export function attachModel(group, name, onDone) {
+  loadModel(name).then((m) => {
+    if (!m) return;
+    for (let i = group.children.length - 1; i >= 0; i--) group.remove(group.children[i]);
+    group.add(normalizeModel(m));
+    if (onDone) onDone();
+  });
+}
+
 // Normalise un modèle chargé : recentré au sol, mis à l'échelle sur une hauteur
 // cible, tourné selon le réglage. Renvoie un Group prêt à poser dans la scène.
 export function normalizeModel(loaded) {
