@@ -127,6 +127,9 @@ Modèles importés dans la scène de jeu, sous licence [CC-BY 3.0](https://creat
 
 - 🚜 **Tractor** — *Poly by Google*, via [Poly Pizza](https://poly.pizza/m/5TGoA5N14c5)
 - 🌳 **Big Tree** — *3Donimus*, via [Poly Pizza](https://poly.pizza/m/dNWh762PN-6)
+- 🐄 **Cow** — *Poly by Google*, via [Poly Pizza](https://poly.pizza/m/0OToIgkcVM7)
+- 🐑 **Sheep** — *Poly by Google*, via [Poly Pizza](https://poly.pizza/m/dXBMV4AY2DL)
+- 🐔 **Rooster** — *Poly by Google*, via [Poly Pizza](https://poly.pizza/m/6NTegstc5Jy)
 
 Le rendu (matériaux PBR, éclairage d'environnement, tone mapping ACES, bloom) et
 les autres objets sont réalisés dans le moteur.

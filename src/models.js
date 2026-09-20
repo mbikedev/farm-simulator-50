@@ -46,7 +46,9 @@ export function loadModel(name) {
 // cible, tourné selon le réglage. Renvoie un Group prêt à poser dans la scène.
 export function normalizeModel(loaded) {
   const root = new THREE.Group();
-  const inner = loaded.scene;
+  // clone : le même modèle chargé peut servir plusieurs objets (ex. 26 animaux).
+  // géométries et matériaux restent partagés (mémoire), seul le graphe est cloné.
+  const inner = loaded.scene.clone(true);
   root.add(inner);
 
   const box = new THREE.Box3().setFromObject(inner);
