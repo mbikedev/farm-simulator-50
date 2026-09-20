@@ -180,7 +180,7 @@ export function buildWorld(scene) {
   const sc = signCanvas.getContext('2d');
   sc.fillStyle = '#20321e'; sc.fillRect(0, 0, 512, 96);
   sc.fillStyle = '#ffe98a'; sc.font = 'bold 52px sans-serif'; sc.textAlign = 'center';
-  sc.fillText('FS50 FABRIEK', 256, 64);
+  sc.fillText('BS50 FABRIEK', 256, 64);
   const sign = new THREE.Mesh(
     new THREE.PlaneGeometry(20, 3.6),
     new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(signCanvas) })

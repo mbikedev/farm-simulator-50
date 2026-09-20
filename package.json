@@ -1,7 +1,7 @@
 {
-  "name": "farming-simulator-50",
+  "name": "boerderij-simulator-50",
   "version": "0.1.0",
-  "description": "Farming Simulator 50 — jeu de simulation de conduite de tracteurs (Android d'abord, puis iOS)",
+  "description": "Boerderij Simulator 50 — jeu de simulation de conduite de tracteurs (Android d'abord, puis iOS)",
   "private": true,
   "type": "module",
   "scripts": {

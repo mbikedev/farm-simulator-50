@@ -1,4 +1,4 @@
-# 🚜 Farming Simulator 50
+# 🚜 Boerderij Simulator 50
 
 Jeu de simulation de conduite de tracteurs en 3D — **interface du jeu en néerlandais** — conçu pour
 **Android d'abord** (via Capacitor), puis iOS. Jouable aussi directement dans un navigateur.
@@ -68,6 +68,5 @@ npx cap open ios        # nécessite un Mac avec Xcode
 
 Moteur : [Three.js](https://threejs.org/) · Packaging mobile : [Capacitor](https://capacitorjs.com/)
 
-> ⚠️ **Note juridique** : « Farming Simulator » est une marque de GIANTS Software.
-> Pour une publication sur le Play Store / App Store, prévoyez de renommer le jeu
-> (par ex. *Boerderij Simulator 50*).
+> ℹ️ Le jeu s'appelle *Boerderij Simulator 50* (« Farming Simulator » est une
+> marque de GIANTS Software, d'où ce nom distinct).

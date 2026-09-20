@@ -1,6 +1,6 @@
 {
-  "appId": "com.mbagnick.farmingsimulator50",
-  "appName": "Farming Simulator 50",
+  "appId": "com.mbagnick.boerderijsimulator50",
+  "appName": "Boerderij Simulator 50",
   "webDir": "dist",
   "backgroundColor": "#0a1e08",
   "android": {
