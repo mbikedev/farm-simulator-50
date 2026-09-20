@@ -692,6 +692,22 @@ function faceTexture() {
   }
   x.restore();
 
+  // prolongement de la barbe sous le menton (barbe longue, hors de l'ovale)
+  x.fillStyle = beard;
+  x.beginPath();
+  x.moveTo(faceCx - 28, faceCy + 58);
+  x.quadraticCurveTo(faceCx - 24, faceCy + 104, faceCx, faceCy + 122);
+  x.quadraticCurveTo(faceCx + 24, faceCy + 104, faceCx + 28, faceCy + 58);
+  x.quadraticCurveTo(faceCx, faceCy + 80, faceCx - 28, faceCy + 58);
+  x.fill();
+  x.strokeStyle = beardHi; x.lineWidth = 1.3;
+  for (let i = -3; i <= 3; i++) {
+    x.beginPath();
+    x.moveTo(faceCx + i * 7, faceCy + 68);
+    x.lineTo(faceCx + i * 4.5, faceCy + 114);
+    x.stroke();
+  }
+
   // implantation des cheveux (front + houppe)
   x.fillStyle = hairCol;
   x.beginPath();
@@ -854,6 +870,13 @@ export function buildFarmer() {
     ear.position.set(sx * 0.27, 2.33, 0.02);
     g.add(ear);
   }
+  // barbe longue en relief : pend sous le menton
+  const beardMat = mat(0x6f4a22);
+  const beardTip = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.34, 10), beardMat);
+  beardTip.rotation.x = Math.PI;        // pointe vers le bas
+  beardTip.scale.set(1.15, 1, 0.75);
+  beardTip.position.set(0, 2.0, 0.16);
+  g.add(beardTip);
 
   return g;
 }
