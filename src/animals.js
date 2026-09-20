@@ -1,6 +1,19 @@
 import * as THREE from 'three';
 import { terrainHeight } from './terrain.js';
 import { audio } from './audio.js';
+import { loadModel, normalizeModel } from './models.js';
+
+// Remplace le mesh codé de chaque animal d'un type par un vrai modèle 3D (si présent).
+function applyAnimalModel(list, name) {
+  loadModel(name).then((m) => {
+    if (!m) return; // pas de fichier -> on garde le mesh codé
+    for (const a of list) {
+      for (let i = a.mesh.children.length - 1; i >= 0; i--) a.mesh.remove(a.mesh.children[i]);
+      a.mesh.add(normalizeModel(m)); // cloné par animal
+      a.hasModel = true;             // désactive l'animation de tête codée
+    }
+  });
+}
 
 // Enclos et zones des animaux
 export const PENS = {
@@ -9,7 +22,7 @@ export const PENS = {
   chickens: { x: -12, z: -40, r: 11 }, // basse-cour près de la grange (sans clôture)
 };
 
-function mat(color) { return new THREE.MeshLambertMaterial({ color }); }
+function mat(color) { return new THREE.MeshStandardMaterial({ color, roughness: 0.85, metalness: 0.0 }); }
 function shadow(o) { o.castShadow = true; return o; }
 
 // ---------- Modèles ----------
@@ -189,6 +202,11 @@ export function buildAnimals(scene) {
 
   for (const a of animals) scene.add(a.mesh);
 
+  // Remplacement par de vrais modèles 3D si les fichiers existent
+  applyAnimalModel(animals.filter(a => a.type === 'cow'), 'cow');
+  applyAnimalModel(animals.filter(a => a.type === 'sheep'), 'sheep');
+  applyAnimalModel(animals.filter(a => a.type === 'chicken'), 'chicken');
+
   // Abreuvoir décoratif dans l'enclos des vaches
   const trough = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.5, 1.0), mat(0x7a8288));
   trough.position.set(PENS.cows.x + 8, terrainHeight(PENS.cows.x + 8, PENS.cows.z) + 0.25, PENS.cows.z);
@@ -249,8 +267,10 @@ export function buildAnimals(scene) {
         const peck = isChicken
           ? (Math.sin(t * 9 + a.phase) > 0.55 ? 0.5 : 0)
           : Math.max(0, Math.sin(t * 0.7 + a.phase)) * 0.55;
-        a.head.rotation.x = peck;
-        a.head.position.y = a.headRest.y - peck * (isChicken ? 0.25 : 0.45);
+        if (!a.hasModel) {
+          a.head.rotation.x = peck;
+          a.head.position.y = a.headRest.y - peck * (isChicken ? 0.25 : 0.45);
+        }
         if (a.timer <= 0) {
           const na = Math.random() * Math.PI * 2;
           const nd = Math.sqrt(Math.random()) * (a.pen.r - 2);
@@ -261,8 +281,10 @@ export function buildAnimals(scene) {
         }
       } else {
         // marcher vers la cible
-        a.head.rotation.x = 0;
-        a.head.position.y = a.headRest.y;
+        if (!a.hasModel) {
+          a.head.rotation.x = 0;
+          a.head.position.y = a.headRest.y;
+        }
         const dx = a.tx - a.x, dz = a.tz - a.z;
         const dist = Math.hypot(dx, dz);
         const speed = a.state === 'flee' ? a.speed * 2.2 : a.speed;

@@ -121,5 +121,18 @@ npx cap open ios        # nécessite un Mac avec Xcode
 
 Moteur : [Three.js](https://threejs.org/) · Packaging mobile : [Capacitor](https://capacitorjs.com/)
 
+## Crédits des modèles 3D
+
+Modèles importés dans la scène de jeu, sous licence [CC-BY 3.0](https://creativecommons.org/licenses/by/3.0/) :
+
+- 🚜 **Tractor** — *Poly by Google*, via [Poly Pizza](https://poly.pizza/m/5TGoA5N14c5)
+- 🌳 **Big Tree** — *3Donimus*, via [Poly Pizza](https://poly.pizza/m/dNWh762PN-6)
+- 🐄 **Cow** — *Poly by Google*, via [Poly Pizza](https://poly.pizza/m/0OToIgkcVM7)
+- 🐑 **Sheep** — *Poly by Google*, via [Poly Pizza](https://poly.pizza/m/dXBMV4AY2DL)
+- 🐔 **Rooster** — *Poly by Google*, via [Poly Pizza](https://poly.pizza/m/6NTegstc5Jy)
+
+Le rendu (matériaux PBR, éclairage d'environnement, tone mapping ACES, bloom) et
+les autres objets sont réalisés dans le moteur.
+
 > ℹ️ Le jeu s'appelle *Boerderij Simulator 50* (« Farming Simulator » est une
 > marque de GIANTS Software, d'où ce nom distinct).
