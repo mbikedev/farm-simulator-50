@@ -383,6 +383,7 @@ const input = createControls({
       return;
     }
     if (game.currentVehicle) game.currentVehicle.onAction(game);
+    else farmerOnFootAction();
   },
   onEnter() {
     if (!started) return;
@@ -518,6 +519,60 @@ function updateCamera(dt) {
   camera.position.lerp(camDesired, k);
   camTarget.set(pos.x, pos.y + (v?.kind === 'crane' ? 14 : 2.5), pos.z);
   camera.lookAt(camTarget);
+}
+
+// ---------- Action à pied : produits d'animaux ou récolte à la main ----------
+const ANIMAL_PRODUCTS = {
+  cow: { emoji: '🥛', name: 'Melk', price: 8 },
+  sheep: { emoji: '🧶', name: 'Wol', price: 6 },
+  chicken: { emoji: '🥚', name: 'Ei', price: 4 },
+};
+const PRODUCT_COOLDOWN = 20; // secondes avant qu'un animal redonne un produit
+
+function farmerOnFootAction() {
+  const p = farmer.position;
+  const now = clock.elapsedTime;
+
+  // 1) animal proche -> récupérer son produit (lait/laine/œuf) contre argent
+  let bestA = null, bestD = 3.6;
+  for (const a of animals.animals) {
+    const d = Math.hypot(a.x - p.x, a.z - p.z);
+    if (d < bestD) { bestD = d; bestA = a; }
+  }
+  if (bestA) {
+    const prod = ANIMAL_PRODUCTS[bestA.type];
+    if (now < bestA.prodReady) {
+      toast(`⏳ ${prod.name} nog niet klaar…`, 1200);
+    } else {
+      bestA.prodReady = now + PRODUCT_COOLDOWN;
+      game.setMoney(game.money + prod.price);
+      game.stats.moneyEarned += prod.price;
+      game.awardXP(3, 'animal');
+      toast(`${prod.emoji} ${prod.name} +${prod.price} €`);
+    }
+    return;
+  }
+
+  // 2) sinon, plant de culture proche -> récolte à la main
+  const EMOJI = { potato: '🥔', wheat: '🌾', corn: '🌽' };
+  let bestP = null, bestPD = 2.8;
+  for (const plant of world.plantData) {
+    if (plant.harvested) continue;
+    const d = Math.hypot(plant.x - p.x, plant.z - p.z);
+    if (d < bestPD) { bestPD = d; bestP = plant; }
+  }
+  if (bestP) {
+    bestP.harvested = true;
+    game.hidePlant(bestP);
+    game.crops[bestP.type]++;
+    game.stats.cropsHarvested++;
+    ui.setCrops(game.crops);
+    game.awardXP(2, 'harvest');
+    toast(`${EMOJI[bestP.type]} +1 met de hand geoogst`);
+    return;
+  }
+
+  toast('🤷 Niets te doen hier. Ga naar dieren of een veld.', 1400);
 }
 
 // ---------- Fermier : marche ----------

@@ -182,9 +182,10 @@ export function buildAnimals(scene) {
   buildFence(scene, PENS.cows);
   buildFence(scene, PENS.sheep);
 
-  for (let i = 0; i < 7; i++) animals.push(makeAnimal(buildCow, PENS.cows, 1.1));
-  for (let i = 0; i < 9; i++) animals.push(makeAnimal(buildSheep, PENS.sheep, 1.4));
-  for (let i = 0; i < 10; i++) animals.push(makeAnimal(buildChicken, PENS.chickens, 2.2));
+  const tag = (a, type) => { a.type = type; a.prodReady = 0; return a; };
+  for (let i = 0; i < 7; i++) animals.push(tag(makeAnimal(buildCow, PENS.cows, 1.1), 'cow'));
+  for (let i = 0; i < 9; i++) animals.push(tag(makeAnimal(buildSheep, PENS.sheep, 1.4), 'sheep'));
+  for (let i = 0; i < 10; i++) animals.push(tag(makeAnimal(buildChicken, PENS.chickens, 2.2), 'chicken'));
 
   for (const a of animals) scene.add(a.mesh);
 
