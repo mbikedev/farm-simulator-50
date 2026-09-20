@@ -643,8 +643,9 @@ function faceTexture() {
   c.width = W; c.height = H;
   const x = c.getContext('2d');
   const cx = W * 0.25;              // centre du visage (avant de la tête)
-  const skin = '#e0a685', skinDark = '#c98c68', skinLight = '#f0bd9a';
-  const hairCol = '#7a3218', hairDark = '#5c2410';
+  // teint métis + cheveux/barbe caramel clair
+  const skin = '#9c6a44', skinDark = '#744e30', skinLight = '#c08c5e';
+  const hairCol = '#a5773f', hairDark = '#7c5528';
 
   // fond = cheveux (couvre côtés, arrière et sommet)
   x.fillStyle = hairCol;
@@ -663,13 +664,32 @@ function faceTexture() {
   x.fillStyle = grd;
   x.fillRect(faceCx - faceRx, faceCy - faceRy, faceRx * 2, faceRy * 2);
 
-  // ombres de modelé (joues, tempes, mâchoire)
-  x.fillStyle = 'rgba(150,95,65,0.28)';
-  x.beginPath(); x.ellipse(faceCx - 34, faceCy + 6, 14, 30, 0, 0, Math.PI * 2); x.fill();
-  x.beginPath(); x.ellipse(faceCx + 34, faceCy + 6, 14, 30, 0, 0, Math.PI * 2); x.fill();
-  // barbe naissante sur la mâchoire (discrète)
-  x.fillStyle = 'rgba(90,45,25,0.14)';
-  x.beginPath(); x.ellipse(faceCx, faceCy + 44, 32, 22, 0, 0, Math.PI * 2); x.fill();
+  // ombres de modelé (joues, tempes)
+  x.fillStyle = 'rgba(80,50,30,0.28)';
+  x.beginPath(); x.ellipse(faceCx - 36, faceCy - 4, 12, 26, 0, 0, Math.PI * 2); x.fill();
+  x.beginPath(); x.ellipse(faceCx + 36, faceCy - 4, 12, 26, 0, 0, Math.PI * 2); x.fill();
+
+  // barbe fournie (mâchoire + menton, remonte sur les joues)
+  const beard = '#6f4a22', beardHi = '#8f6432';
+  x.fillStyle = beard;
+  x.beginPath();
+  x.moveTo(faceCx - 46, faceCy - 8);
+  x.quadraticCurveTo(faceCx - 48, faceCy + 52, faceCx - 20, faceCy + 74);
+  x.quadraticCurveTo(faceCx, faceCy + 86, faceCx + 20, faceCy + 74);
+  x.quadraticCurveTo(faceCx + 48, faceCy + 52, faceCx + 46, faceCy - 8);
+  // bord supérieur : remonte sur les joues, laisse le milieu (bouche) sous la moustache
+  x.quadraticCurveTo(faceCx + 40, faceCy + 14, faceCx + 22, faceCy + 26);
+  x.quadraticCurveTo(faceCx, faceCy + 22, faceCx - 22, faceCy + 26);
+  x.quadraticCurveTo(faceCx - 40, faceCy + 14, faceCx - 46, faceCy - 8);
+  x.fill();
+  // mèches claires de la barbe (volume)
+  x.strokeStyle = beardHi; x.lineWidth = 1.4;
+  for (let i = -6; i <= 6; i++) {
+    x.beginPath();
+    x.moveTo(faceCx + i * 5.5, faceCy + 34);
+    x.lineTo(faceCx + i * 6.5, faceCy + 68);
+    x.stroke();
+  }
   x.restore();
 
   // implantation des cheveux (front + houppe)
@@ -709,16 +729,16 @@ function faceTexture() {
   }
 
   // nez (arête ombrée + narines)
-  x.strokeStyle = 'rgba(150,95,65,0.35)'; x.lineWidth = 4;
+  x.strokeStyle = 'rgba(70,45,25,0.4)'; x.lineWidth = 4;
   x.beginPath(); x.moveTo(faceCx - 3, faceCy - 6); x.lineTo(faceCx - 5, faceCy + 16); x.stroke();
-  x.fillStyle = 'rgba(120,75,50,0.5)';
+  x.fillStyle = 'rgba(55,35,20,0.55)';
   x.beginPath(); x.ellipse(faceCx - 6, faceCy + 18, 3, 2, 0, 0, Math.PI * 2); x.fill();
   x.beginPath(); x.ellipse(faceCx + 6, faceCy + 18, 3, 2, 0, 0, Math.PI * 2); x.fill();
-  x.fillStyle = 'rgba(240,190,155,0.5)';
+  x.fillStyle = 'rgba(200,150,105,0.5)';
   x.beginPath(); x.ellipse(faceCx, faceCy + 14, 4, 6, 0, 0, Math.PI * 2); x.fill(); // pointe éclairée
 
-  // moustache (guidon épais et sombre) sous le nez
-  x.fillStyle = hairDark;
+  // moustache (guidon) sous le nez, reliée à la barbe
+  x.fillStyle = '#6f4a22';
   x.beginPath();
   x.moveTo(faceCx, faceCy + 24);
   x.quadraticCurveTo(faceCx - 16, faceCy + 22, faceCx - 26, faceCy + 26);
@@ -729,7 +749,7 @@ function faceTexture() {
   x.quadraticCurveTo(faceCx + 16, faceCy + 22, faceCx, faceCy + 24);
   x.fill();
   // reflets/mèches de la moustache
-  x.strokeStyle = hairCol; x.lineWidth = 1.5;
+  x.strokeStyle = hairDark; x.lineWidth = 1.5;
   for (let i = -3; i <= 3; i++) {
     x.beginPath();
     x.moveTo(faceCx + i * 5, faceCy + 25);
@@ -737,9 +757,9 @@ function faceTexture() {
     x.stroke();
   }
 
-  // bouche (lèvres) sous la moustache
-  x.strokeStyle = '#a85a4a'; x.lineWidth = 3;
-  x.beginPath(); x.moveTo(faceCx - 11, faceCy + 42); x.quadraticCurveTo(faceCx, faceCy + 46, faceCx + 11, faceCy + 42); x.stroke();
+  // bouche (entre moustache et barbe)
+  x.strokeStyle = '#8a4638'; x.lineWidth = 3;
+  x.beginPath(); x.moveTo(faceCx - 10, faceCy + 39); x.quadraticCurveTo(faceCx, faceCy + 43, faceCx + 10, faceCy + 39); x.stroke();
 
   const tex = new THREE.CanvasTexture(c);
   _faceTex = tex;
@@ -748,10 +768,10 @@ function faceTexture() {
 
 export function buildFarmer() {
   const g = new THREE.Group();
-  const skin = mat(0xe4a980);
+  const skin = mat(0x9c6a44);   // teint métis
   const denim = mat(0x3b4654);
   const boot = mat(0x2e2117);
-  const hair = mat(0x7a3218);   // roux/auburn
+  const hair = mat(0xa5773f);   // cheveux caramel clair
   const shirt = plaidMaterial();
 
   // bottes
