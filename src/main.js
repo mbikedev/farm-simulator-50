@@ -16,6 +16,7 @@ import { createWeather } from './weather.js';
 import { createMarket } from './market.js';
 import { createProgression, XP } from './progression.js';
 import { readSave, writeSave, clearSave } from './save.js';
+import { attachModel } from './models.js';
 import titleBg from './assets/titleBg.js';
 
 // image de fond de l'écran-titre (le voile sombre est géré en CSS)
@@ -362,6 +363,8 @@ function buildHouse() {
   const chimney = new THREE.Mesh(new THREE.BoxGeometry(0.9, 2.2, 0.9), lam(0x8a5a48));
   chimney.position.set(2.4, 6.6, -1.5);
   g.add(chimney);
+  // Remplace par le vrai modèle 3D (public/models/house.glb) si présent
+  attachModel(g, 'house');
   return g;
 }
 
