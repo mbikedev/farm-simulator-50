@@ -27,6 +27,9 @@ Jeu de simulation de conduite de tracteurs en 3D — **interface du jeu en néer
   véhicules la nuit, vrais faisceaux lumineux sur le véhicule conduit.
 - 🔊 **Sons synthétisés** (Web Audio, aucun fichier) : moteur lié au régime, meuglements,
   bêlements, caquètements avec atténuation par distance ; bouton 🔊/🔇 dans le HUD.
+- 🌧️ **Météo dynamique** : alternance aléatoire clair / pluie / brouillard avec transitions
+  douces — gouttes qui suivent le joueur, bruit de pluie, nappe de brouillard qui réduit
+  la visibilité ; indicateur ☀️/🌧️/🌫️ dans le HUD.
 - 📋 **6 missions** guidées, économie (💶 argent, 🥔 pommes de terre, 🧱 matériaux).
 - 📱 **Contrôles tactiles** (joystick virtuel + boutons) et clavier (flèches/WASD/ZQSD,
   Espace = action, E = monter/descendre, B = construire).
@@ -38,6 +41,8 @@ Jeu de simulation de conduite de tracteurs en 3D — **interface du jeu en néer
 ![Animaux](docs/screenshots/dieren.png)
 
 ![Nuit](docs/screenshots/nacht.png)
+
+![Pluie](docs/screenshots/regen.png)
 
 ## Lancer en développement (navigateur)
 
