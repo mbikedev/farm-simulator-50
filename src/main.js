@@ -38,9 +38,9 @@ const market = createMarket(scene);
 const game = {
   world,
   scene,
-  money: 500,
+  money: 800,
   crops: { potato: 0, wheat: 0, corn: 0 },
-  materials: 4,
+  materials: 12,
   stats: {
     potatoesHarvested: 0,
     potatoesDelivered: 0,
@@ -306,10 +306,10 @@ const input = createControls({
     const pos = game.currentVehicle ? game.currentVehicle.mesh.position : farmer.position;
     const lz = SPOTS.loadZone;
     if (Math.hypot(pos.x - lz.x, pos.z - lz.z) < lz.r) {
-      if (game.money >= 15) {
-        game.setMoney(game.money - 15);
+      if (game.money >= 10) {
+        game.setMoney(game.money - 10);
         game.setMaterials(game.materials + 1);
-        toast('🧱 +1 materiaal gekocht (−15 €)');
+        toast('🧱 +1 materiaal gekocht (−10 €)');
       } else {
         toast('💶 Niet genoeg geld!');
       }

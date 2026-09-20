@@ -102,9 +102,9 @@ export function setupBuildMenu(game) {
   const items = el('build-items');
 
   const catalog = [
-    { id: 'house', name: '🏠 Huis', matCost: 8, moneyCost: 200 },
-    { id: 'shed', name: '🛖 Schuur', matCost: 5, moneyCost: 100 },
-    { id: 'tractor', name: '🚜 Eigen tractor bouwen', matCost: 12, moneyCost: 500 },
+    { id: 'shed', name: '🛖 Schuur', matCost: 3, moneyCost: 50 },
+    { id: 'house', name: '🏠 Huis', matCost: 6, moneyCost: 120 },
+    { id: 'tractor', name: '🚜 Eigen tractor bouwen', matCost: 10, moneyCost: 300 },
   ];
 
   function render() {
