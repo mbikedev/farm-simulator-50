@@ -5,6 +5,7 @@
 let ctx = null;
 let master = null;
 let engine = null;
+let rainNode = null;
 let muted = false;
 
 function ensureContext() {
@@ -97,6 +98,22 @@ function createEngine(c) {
   };
 }
 
+// ---------- Pluie ----------
+
+function createRain(c) {
+  const src = c.createBufferSource();
+  src.buffer = makeNoiseBuffer(c);
+  src.loop = true;
+  const filter = c.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.value = 2400;
+  const gain = c.createGain();
+  gain.gain.value = 0;
+  src.connect(filter).connect(gain).connect(master);
+  src.start();
+  return { gain };
+}
+
 // ---------- Cris d'animaux ----------
 
 function envGain(c, t0, attack, hold, release, peak) {
@@ -177,6 +194,14 @@ export const audio = {
   unlock() {
     ensureContext();
     if (ctx && !engine) engine = createEngine(ctx);
+    if (ctx && !rainNode) rainNode = createRain(ctx);
+  },
+
+  // bruit de pluie continu, intensité 0..1
+  setRain(intensity) {
+    if (!ctx || !rainNode) return;
+    const v = muted ? 0 : 0.16 * intensity;
+    rainNode.gain.gain.setTargetAtTime(v, ctx.currentTime, 0.4);
   },
 
   // moteur : kind = tractor|harvester|mixer|excavator|boat|null, throttle 0..1

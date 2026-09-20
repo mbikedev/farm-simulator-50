@@ -8,6 +8,7 @@ export const ui = {
   setMaterials(v) { el('hud-materials').textContent = `🧱 ${v}`; },
   setVehicle(name) { el('hud-vehicle').textContent = name; },
   setTime(text) { el('hud-time').textContent = text; },
+  setWeather(text) { el('hud-weather').textContent = text; },
   setMission(html) { el('hud-mission').innerHTML = html; },
 };
 

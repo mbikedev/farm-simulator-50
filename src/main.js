@@ -6,6 +6,7 @@ import { Tractor, Harvester, MixerTruck, Excavator, Boat, Crane, buildFarmer } f
 import { ui, toast, missions, missionHTML, setupBuildMenu } from './ui.js';
 import { createControls } from './controls.js';
 import { audio } from './audio.js';
+import { createWeather } from './weather.js';
 
 // ---------- Rendu ----------
 const canvas = document.getElementById('game-canvas');
@@ -27,6 +28,7 @@ window.addEventListener('resize', () => {
 // ---------- Monde ----------
 const world = buildWorld(scene);
 const animals = buildAnimals(scene);
+const weather = createWeather(scene);
 
 // ---------- État du jeu ----------
 const game = {
@@ -450,9 +452,11 @@ const idleInput = { forward: 0, turn: 0 };
 window.__game = game;
 window.__farmer = farmer;
 window.__enterVehicle = enterVehicle;
+window.__weather = weather;
 
 const DAY_LENGTH = 300; // durée d'une journée complète en secondes
 let lastClockText = '';
+let lastWeatherEmoji = '';
 
 renderer.setAnimationLoop(() => {
   const dt = Math.min(clock.getDelta(), 0.05);
@@ -466,6 +470,11 @@ renderer.setAnimationLoop(() => {
   const minutes = Math.floor((game.timeOfDay * 24 % 1) * 60);
   const clockText = `${isNight ? '🌙' : '🕐'} ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
   if (clockText !== lastClockText) { lastClockText = clockText; ui.setTime(clockText); }
+
+  // météo (après le cycle jour/nuit, qui fixe lumière et couleurs de base)
+  const focusPos = game.currentVehicle ? game.currentVehicle.mesh.position : farmer.position;
+  const weatherEmoji = weather.update(dt, focusPos, world.sun, world.hemi, dayFactor);
+  if (weatherEmoji !== lastWeatherEmoji) { lastWeatherEmoji = weatherEmoji; ui.setWeather(weatherEmoji); }
 
   if (started) {
     for (const v of game.vehicles) {

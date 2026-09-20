@@ -37,6 +37,7 @@ export function buildWorld(scene) {
 
   const hemi = new THREE.HemisphereLight(0xbfe3ff, 0x3d5a2a, 0.9);
   scene.add(hemi);
+  world.hemi = hemi;
 
   const sun = new THREE.DirectionalLight(0xfff2d0, 1.6);
   sun.position.set(120, 180, 60);
