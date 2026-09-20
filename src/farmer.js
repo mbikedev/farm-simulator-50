@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 // modèle embarqué en data-URL base64 (le service d'artifacts ne diffuse pas les .glb)
 import farmerData from './assets/farmerModel.js';
+import { MIME as TEX_MIME, DATA as TEX_DATA } from './assets/farmerTexture.js';
 
 // Charge le modèle 3D texturé du fermier (statique, sans rig).
 // Renvoie un THREE.Group tout de suite ; le modèle est ajouté au chargement du .glb.
@@ -9,13 +10,37 @@ import farmerData from './assets/farmerModel.js';
 
 const TARGET_HEIGHT = 1.95; // hauteur visée (m)
 
-// Décode le base64 en ArrayBuffer (évite tout fetch, bloqué par la CSP des artifacts)
-function glbBuffer(dataUrl) {
-  const b64 = dataUrl.slice(dataUrl.indexOf(',') + 1);
+// Décode une chaîne base64 en Uint8Array
+function b64ToBytes(b64) {
   const bin = atob(b64);
   const bytes = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  return bytes.buffer;
+  return bytes;
+}
+
+// Décode le glb (évite tout fetch, bloqué par la CSP des artifacts)
+function glbBuffer(dataUrl) {
+  return b64ToBytes(dataUrl.slice(dataUrl.indexOf(',') + 1)).buffer;
+}
+
+// Applique la texture au modèle. GLTFLoader décode l'image via un blob:
+// que la CSP des artifacts bloque -> on la décode nous-mêmes avec
+// createImageBitmap (sur un Blob, sans URL : insensible à la CSP).
+function applyTexture(model) {
+  const blob = new Blob([b64ToBytes(TEX_DATA)], { type: TEX_MIME });
+  createImageBitmap(blob).then((bitmap) => {
+    const tex = new THREE.Texture(bitmap);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.flipY = false; // convention glTF (UV déjà orientées)
+    tex.needsUpdate = true;
+    model.traverse((o) => {
+      if (o.isMesh && o.material) {
+        o.material.map = tex;
+        o.material.color && o.material.color.setScalar(1);
+        o.material.needsUpdate = true;
+      }
+    });
+  }).catch((e) => console.warn('Texture fermier: décodage échoué', e));
 }
 
 export function createFarmer() {
@@ -43,6 +68,7 @@ export function createFarmer() {
       }
     });
     group.add(model);
+    applyTexture(model);          // texture décodée de façon compatible CSP
     state.model = model;
     state.baseY = model.position.y;
     state.ready = true;
