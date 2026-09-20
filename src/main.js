@@ -455,7 +455,13 @@ const input = createControls({
 
 function enterVehicle(v) {
   game.currentVehicle = v;
-  farmer.visible = false;
+  // le conducteur reste visible, assis à la place définie sur le véhicule
+  const seat = v.seat || { x: 0, y: 1.3, z: 0, scale: 0.8 };
+  v.mesh.add(farmer);                 // rattache le fermier au véhicule
+  farmer.position.set(seat.x, seat.y, seat.z);
+  farmer.rotation.set(0, 0, 0);       // regarde vers l'avant du véhicule
+  farmer.scale.setScalar(seat.scale ?? 0.8);
+  farmer.visible = true;
   ui.setVehicle(`${v.emoji} ${v.name}`);
   toast(`${v.emoji} ${v.name}`);
 }
@@ -472,6 +478,9 @@ function exitVehicle() {
     const x = v.mesh.position.x + ox;
     const z = v.mesh.position.z + oz;
     if (terrainHeight(x, z) > WATER_LEVEL + 0.2) {
+      scene.add(farmer);              // détache le fermier du véhicule
+      farmer.scale.setScalar(1);
+      farmer.rotation.set(0, 0, 0);
       farmer.position.set(x, terrainHeight(x, z), z);
       farmer.visible = true;
       farmerState.heading = v.heading;

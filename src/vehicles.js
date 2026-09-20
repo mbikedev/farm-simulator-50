@@ -59,6 +59,8 @@ export class Vehicle {
     this.time = 0;
     this.headlightSpots = [];
     this.lampMat = null;
+    // position du conducteur (coords locales du véhicule) — surchargée par véhicule
+    this.seat = def.seat ?? { x: 0, y: 1.3, z: 0, scale: 0.8 };
   }
 
   // Phares : lampes à ±lx (visibles de jour, lumineuses de nuit)
@@ -230,6 +232,7 @@ export class Tractor extends Vehicle {
 
     // Remplace par le vrai modèle 3D si public/models/tractor.glb existe
     this.useModel('tractor', [0.55, 1.5, 2.7]);
+    this.seat = { x: 0, y: 1.72, z: -0.4, scale: 0.68 };
   }
 }
 
@@ -283,6 +286,7 @@ export class Harvester extends Vehicle {
     this.addWheel(0.8, 0.5, -1.3, 0.8, 1.8, true);
     this.addWheel(0.8, 0.5, 1.3, 0.8, 1.8, true);
     this.addHeadlights(0.7, 3.2, 2.15);
+    this.seat = { x: 0, y: 2.55, z: 1.15, scale: 0.78 };
   }
 
   totalCargo() {
@@ -365,6 +369,7 @@ export class MixerTruck extends Vehicle {
     this.addWheel(0.75, 0.5, -1.15, 0.75, -2.2, false, 0x666666);
     this.addWheel(0.75, 0.5, 1.15, 0.75, -2.2, false, 0x666666);
     this.addHeadlights(0.85, 1.7, 3.25);
+    this.seat = { x: 0, y: 1.5, z: 1.95, scale: 0.78 };
   }
 
   update(dt, input, game) {
@@ -432,6 +437,7 @@ export class Excavator extends Vehicle {
     this.turret.position.y = 1.0;
     this.mesh.add(this.turret);
     this.addHeadlights(0.9, 1.3, 2.3);
+    this.seat = { x: -0.5, y: 2.1, z: 0.2, scale: 0.72 };
   }
 
   update(dt, input, game) {
@@ -494,6 +500,7 @@ export class Boat extends Vehicle {
     this.mesh.add(flag);
     // feu de proue
     this.addHeadlights(0, 1.35, 3.7);
+    this.seat = { x: 0, y: 1.35, z: 0.2, scale: 0.8 };
   }
 
   update(dt, input, game) {
@@ -575,6 +582,7 @@ export class Crane extends Vehicle {
     this.top.position.y = 20.6;
     this.mesh.add(this.top);
     this.hookHeight = 6; // hauteur du crochet au-dessus du sol
+    this.seat = { x: 1.8, y: 0, z: 2.2, scale: 1.0 }; // opérateur debout au pied
   }
 
   // Position monde du crochet
