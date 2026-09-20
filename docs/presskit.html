@@ -1,0 +1,360 @@
+<title>Boerderij Press Kit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --paper: #f2eee1;
+    --surface: #fbf9f1;
+    --surface-2: #ebe4d1;
+    --ink: #232a1c;
+    --muted: #6c705d;
+    --line: #dcd5c1;
+    --green: #3f7d23;
+    --green-bright: #6bbf3a;
+    --barn: #b5342a;
+    --soil: #8a6a42;
+    --sky: #5ea3ce;
+    --shadow: 0 1px 2px rgba(40,45,25,.06), 0 8px 24px rgba(40,45,25,.07);
+    color-scheme: light;
+  }
+  :root:not([data-theme="light"]) { }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0f140c;
+      --surface: #171e12;
+      --surface-2: #202a19;
+      --ink: #edf1e4;
+      --muted: #98a487;
+      --line: #2b361f;
+      --green: #7ddf5a;
+      --green-bright: #a2f072;
+      --barn: #e2674f;
+      --soil: #b98a5f;
+      --sky: #83c1e7;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.35);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0f140c;
+    --surface: #171e12;
+    --surface-2: #202a19;
+    --ink: #edf1e4;
+    --muted: #98a487;
+    --line: #2b361f;
+    --green: #7ddf5a;
+    --green-bright: #a2f072;
+    --barn: #e2674f;
+    --soil: #b98a5f;
+    --sky: #83c1e7;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.35);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Hanken Grotesk", system-ui, -apple-system, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding-inline: 20px; }
+
+  /* ---------- Header ---------- */
+  header {
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(120% 90% at 85% -10%, color-mix(in srgb, var(--green-bright) 22%, transparent), transparent 60%),
+      linear-gradient(180deg, var(--surface), var(--paper));
+    border-bottom: 1px solid var(--line);
+  }
+  .hero { padding-block: 48px 40px; }
+  .eyebrow {
+    font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--green); font-weight: 700; margin: 0 0 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .eyebrow::before {
+    content: ""; width: 26px; height: 2px; background: var(--green); display: inline-block;
+  }
+  h1 {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 600; font-size: clamp(34px, 6vw, 60px);
+    line-height: 1.02; margin: 0 0 14px; text-wrap: balance;
+    letter-spacing: -0.01em;
+  }
+  h1 em { font-style: italic; color: var(--green); }
+  .lede { font-size: clamp(15px, 2.2vw, 18px); color: var(--muted); max-width: 62ch; margin: 0; }
+  .note {
+    margin-top: 22px; padding: 14px 16px;
+    background: color-mix(in srgb, var(--barn) 10%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--barn) 30%, var(--line));
+    border-radius: 12px; font-size: 14px; color: var(--ink);
+    max-width: 68ch;
+  }
+  .note b { color: var(--barn); }
+
+  .toolbar {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    margin-top: 26px;
+  }
+  .chip {
+    font-size: 13px; font-weight: 600;
+    padding: 7px 13px; border-radius: 999px;
+    background: var(--surface); border: 1px solid var(--line); color: var(--ink);
+  }
+  .chip.tool { background: color-mix(in srgb, var(--green) 12%, var(--surface)); border-color: color-mix(in srgb, var(--green) 34%, var(--line)); }
+  .spacer { flex: 1; }
+  #theme {
+    font: inherit; font-size: 13px; font-weight: 600;
+    padding: 7px 13px; border-radius: 999px; cursor: pointer;
+    background: var(--surface); border: 1px solid var(--line); color: var(--ink);
+  }
+  #theme:hover { border-color: var(--green); }
+
+  /* ---------- Sections ---------- */
+  main { padding-block: 40px 64px; }
+  .section-head { display: flex; align-items: baseline; gap: 12px; margin: 0 0 20px; }
+  .section-head h2 {
+    font-family: "Fraunces", Georgia, serif; font-weight: 600;
+    font-size: clamp(20px, 3.4vw, 26px); margin: 0; letter-spacing: -0.01em;
+  }
+  .section-head .count { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  .grid {
+    display: grid; gap: 18px;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 16px; box-shadow: var(--shadow);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .card-top { padding: 16px 16px 12px; display: flex; align-items: flex-start; gap: 12px; }
+  .card-num {
+    font-family: "IBM Plex Mono", monospace; font-size: 12px; font-weight: 500;
+    color: var(--paper); background: var(--green);
+    width: 26px; height: 26px; border-radius: 8px; flex: none;
+    display: grid; place-items: center; margin-top: 2px;
+  }
+  .card-title { margin: 0; font-weight: 700; font-size: 16px; line-height: 1.25; }
+  .card-sub { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
+  .card-ratio {
+    margin-left: auto; flex: none;
+    font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 500;
+    color: var(--sky); border: 1px solid color-mix(in srgb, var(--sky) 40%, var(--line));
+    padding: 3px 8px; border-radius: 6px; white-space: nowrap;
+  }
+  pre.prompt {
+    margin: 0; padding: 14px 16px;
+    background: var(--surface-2);
+    border-top: 1px solid var(--line);
+    font-family: "IBM Plex Mono", monospace; font-size: 12.5px; line-height: 1.6;
+    color: var(--ink);
+    white-space: pre-wrap; word-break: break-word;
+    flex: 1;
+  }
+  .card-actions { display: flex; border-top: 1px solid var(--line); }
+  .copy {
+    flex: 1; font: inherit; font-weight: 600; font-size: 13.5px;
+    padding: 12px; cursor: pointer; border: none;
+    background: transparent; color: var(--green);
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    transition: background .15s;
+  }
+  .copy:hover { background: color-mix(in srgb, var(--green) 12%, transparent); }
+  .copy.done { color: var(--ink); }
+  .copy svg { width: 15px; height: 15px; }
+
+  /* ---------- Tips ---------- */
+  .tips {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 16px; padding: 22px; box-shadow: var(--shadow);
+  }
+  .tips h2 { font-family: "Fraunces", serif; font-weight: 600; margin: 0 0 14px; font-size: 20px; }
+  .tips ul { margin: 0; padding-left: 18px; display: grid; gap: 9px; }
+  .tips li { font-size: 14px; }
+  .kbd {
+    font-family: "IBM Plex Mono", monospace; font-size: 12px;
+    background: var(--surface-2); border: 1px solid var(--line);
+    border-radius: 5px; padding: 1px 6px; color: var(--ink);
+  }
+  .neg {
+    margin-top: 16px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    background: var(--surface-2); border: 1px solid var(--line);
+    border-radius: 12px; padding: 12px 14px;
+  }
+  .neg code {
+    font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--barn);
+    flex: 1; min-width: 200px;
+  }
+  .neg button {
+    font: inherit; font-weight: 600; font-size: 13px; cursor: pointer;
+    background: var(--barn); color: #fff; border: none; border-radius: 8px; padding: 8px 14px;
+  }
+
+  footer { color: var(--muted); font-size: 13px; padding-block: 8px 8px; border-top: 1px solid var(--line); margin-top: 40px; }
+  footer .dot { color: var(--green); }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<header>
+  <div class="wrap hero">
+    <p class="eyebrow">Press Kit · Prompts d'images IA</p>
+    <h1>Boerderij Simulator 50 — visuels <em>quasi‑réels</em></h1>
+    <p class="lede">Une collection de prompts prêts à coller pour générer des images de présentation photoréalistes de la ferme, des véhicules et du fermier — dans l'esprit d'un Farming Simulator, mais pour votre jeu.</p>
+
+    <div class="note"><b>À savoir :</b> ces prompts se collent dans un générateur d'images IA — ils ne modifient pas le rendu temps réel du jeu (qui reste léger pour le mobile). Écrits en anglais, car les modèles y sont les plus performants.</div>
+
+    <div class="toolbar">
+      <span class="chip tool">Midjourney</span>
+      <span class="chip tool">Flux · Leonardo.ai</span>
+      <span class="chip tool">Google ImageFX</span>
+      <span class="chip tool">DALL·E / ChatGPT</span>
+      <span class="spacer"></span>
+      <button id="theme" type="button" aria-label="Changer de thème">🌙 Thème</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="section-head">
+    <h2>Les scènes</h2>
+    <span class="count" id="count"></span>
+  </div>
+  <div class="grid" id="grid"></div>
+
+  <section class="tips">
+    <h2>Conseils rapides</h2>
+    <ul>
+      <li>Gardez la <b>même graine (seed)</b> d'une image à l'autre pour un style cohérent sur tous les visuels.</li>
+      <li>Ratios : <span class="kbd">--ar 16:9</span> pour les bannières, <span class="kbd">--ar 9:16</span> pour les affiches mobiles, <span class="kbd">--ar 3:4</span> pour les portraits.</li>
+      <li>Générez 4 variantes, gardez la meilleure, puis demandez des « variations » pour l'affiner.</li>
+      <li>Pour un rendu de jeu, ajoutez des mots-clés comme <span class="kbd">unreal engine 5</span>, <span class="kbd">PBR materials</span>, <span class="kbd">cinematic lighting</span>, <span class="kbd">8k</span>.</li>
+    </ul>
+    <div class="neg">
+      <code id="neg">blurry, cartoon, low quality, deformed, extra limbs, text artifacts, watermark, oversaturated</code>
+      <button type="button" id="copyNeg">Copier le negative prompt</button>
+    </div>
+  </section>
+
+  <footer class="wrap" style="padding-inline:0">
+    <span class="dot">●</span> Boerderij Simulator 50 · pack de prompts — envoyez-moi les images générées, je les intègre au README ou à l'écran‑titre.
+  </footer>
+</main>
+
+<script>
+  const PROMPTS = [
+    { t: "Vue héroïque de la ferme", s: "Image principale / bannière", r: "--ar 16:9",
+      p: "Photorealistic aerial view of a Belgian countryside farm at golden hour, red wooden barn, green fields of potatoes and wheat, a modern green tractor on a dirt road, a small lake with a wooden jetty, cinematic lighting, volumetric light, ultra detailed, 8k, unreal engine 5 render, farming simulator style" },
+    { t: "Tracteur au champ", s: "Action, gros plan", r: "--ar 16:9",
+      p: "Photorealistic modern green farm tractor plowing a potato field, low camera angle, dust particles in the air, warm afternoon sunlight, shallow depth of field, highly detailed PBR materials and reflections, 8k, cinematic" },
+    { t: "Le fermier", s: "Portrait du personnage", r: "--ar 3:4",
+      p: "Photorealistic portrait of a mixed-race Belgian farmer, around 30 years old, short caramel hair, thick handlebar moustache, red plaid flannel shirt and blue denim overalls, standing in front of a red barn, natural daylight, ultra detailed skin texture, 85mm lens, 8k" },
+    { t: "Arracheuse de pommes de terre", s: "Aardappelrooier au travail", r: "--ar 16:9",
+      p: "Photorealistic red potato harvester machine working in a field, potatoes tumbling into the hopper, motion and dust, dramatic overcast sky breaking into golden light, ultra detailed, 8k, farming simulator 25 style" },
+    { t: "Grange au coucher du soleil", s: "Ambiance chaude", r: "--ar 16:9",
+      p: "Photorealistic red wooden barn and metal silo on a Belgian farm at sunset, long shadows across the grass, black and white cows in a fenced pasture, warm orange and pink sky, cinematic, ultra realistic, 8k" },
+    { t: "Nuit avec phares", s: "Scène nocturne", r: "--ar 16:9",
+      p: "Photorealistic green tractor working at night, bright headlights cutting through low fog over a farm field, starry sky, moody cinematic lighting, glowing farmhouse windows in the distance, ultra detailed, 8k" },
+    { t: "Bateau sur le lac", s: "Boot, calme du matin", r: "--ar 16:9",
+      p: "Photorealistic small motorboat crossing a calm lake at a rural farm, soft reflections on the water, green rolling hills and a small island with a red flag, gentle morning light and mist, ultra realistic, 8k" },
+    { t: "L'usine", s: "Fabriek, convoyeur", r: "--ar 16:9",
+      p: "Photorealistic industrial farm processing factory with a smoking chimney and conveyor belts moving crates, trucks unloading crops, overcast cinematic sky, ultra detailed PBR, 8k, farming simulator style" },
+    { t: "Le marché", s: "Markt aux prix variables", r: "--ar 3:2",
+      p: "Photorealistic rustic farmers market stall with a red and white striped awning, wooden crates full of potatoes, wheat and corn, a chalkboard price sign, warm daylight, bokeh background, ultra detailed, 8k" },
+    { t: "Les animaux", s: "Vaches, moutons, poules", r: "--ar 16:9",
+      p: "Photorealistic farm animals in a green fenced pasture: black and white cows, fluffy sheep and hens near a wooden coop, soft natural light, depth of field, ultra realistic fur and detail, 8k" },
+    { t: "Grue de chantier", s: "Kraan, construction de routes", r: "--ar 16:9",
+      p: "Photorealistic yellow tower crane on a rural construction site lifting a wooden crate, freshly poured asphalt road across green fields, dramatic sky, ultra detailed, 8k, cinematic" },
+    { t: "Affiche du jeu", s: "Key art mobile", r: "--ar 9:16",
+      p: "Mobile game key art poster titled 'Boerderij Simulator 50', photorealistic Belgian farm scene with a green tractor, a potato harvester and a red barn, dynamic hero composition, dramatic golden lighting, AAA game marketing style, bold clean layout, 8k" },
+  ];
+
+  const grid = document.getElementById("grid");
+  document.getElementById("count").textContent = PROMPTS.length + " scènes";
+  const clip = "M9 2.5h6a1 1 0 0 1 1 1V4h1.5A1.5 1.5 0 0 1 19 5.5v12A1.5 1.5 0 0 1 17.5 19h-11A1.5 1.5 0 0 1 5 17.5v-12A1.5 1.5 0 0 1 6.5 4H8v-.5a1 1 0 0 1 1-1Zm0 2v1h6v-1H9Z";
+
+  PROMPTS.forEach((item, i) => {
+    const card = document.createElement("article");
+    card.className = "card";
+    const num = String(i + 1).padStart(2, "0");
+    card.innerHTML =
+      '<div class="card-top">' +
+        '<span class="card-num">' + num + '</span>' +
+        '<div><h3 class="card-title"></h3><p class="card-sub"></p></div>' +
+        '<span class="card-ratio"></span>' +
+      '</div>' +
+      '<pre class="prompt"></pre>' +
+      '<div class="card-actions">' +
+        '<button class="copy" type="button">' +
+          '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="' + clip + '"/></svg>' +
+          '<span class="lbl">Copier le prompt</span>' +
+        '</button>' +
+      '</div>';
+    card.querySelector(".card-title").textContent = item.t;
+    card.querySelector(".card-sub").textContent = item.s;
+    card.querySelector(".card-ratio").textContent = item.r;
+    card.querySelector(".prompt").textContent = item.p + " " + item.r;
+    const btn = card.querySelector(".copy");
+    btn.addEventListener("click", () => copyText(item.p + " " + item.r, btn));
+    grid.appendChild(card);
+  });
+
+  function copyText(text, btn) {
+    const label = btn.querySelector(".lbl");
+    const done = () => {
+      btn.classList.add("done");
+      const old = label.textContent;
+      label.textContent = "Copié ✓";
+      setTimeout(() => { label.textContent = old; btn.classList.remove("done"); }, 1600);
+    };
+    try {
+      navigator.clipboard.writeText(text).then(done).catch(() => fallback(text, done));
+    } catch (e) { fallback(text, done); }
+  }
+  function fallback(text, done) {
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      document.execCommand("copy"); ta.remove(); done();
+    } catch (e) { /* silencieux */ }
+  }
+
+  const negBtn = document.getElementById("copyNeg");
+  negBtn.addEventListener("click", () => {
+    const t = document.getElementById("neg").textContent;
+    const lbl = { querySelector: () => negBtn, };
+    try {
+      navigator.clipboard.writeText(t).then(() => flash(negBtn)).catch(() => flash(negBtn));
+    } catch (e) { flash(negBtn); }
+  });
+  function flash(b) { const o = b.textContent; b.textContent = "Copié ✓"; setTimeout(() => b.textContent = o, 1600); }
+
+  // Thème (préférence par-viewer, best-effort)
+  const root = document.documentElement;
+  const themeBtn = document.getElementById("theme");
+  let stored = null;
+  try { stored = localStorage.getItem("bs50_presskit_theme"); } catch (e) {}
+  if (stored === "dark" || stored === "light") root.setAttribute("data-theme", stored);
+  function paint() {
+    const dark = root.getAttribute("data-theme") === "dark" ||
+      (!root.hasAttribute("data-theme") && matchMedia("(prefers-color-scheme: dark)").matches);
+    themeBtn.textContent = dark ? "☀️ Thème" : "🌙 Thème";
+  }
+  themeBtn.addEventListener("click", () => {
+    const dark = root.getAttribute("data-theme") === "dark" ||
+      (!root.hasAttribute("data-theme") && matchMedia("(prefers-color-scheme: dark)").matches);
+    const next = dark ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("bs50_presskit_theme", next); } catch (e) {}
+    paint();
+  });
+  paint();
+</script>
