@@ -633,6 +633,119 @@ function plaidMaterial() {
   return _plaidMat;
 }
 
+// Visage peint sur une texture, appliqué à la sphère de la tête.
+// Repère UV de SphereGeometry : u=0.25 -> avant (+z), v croît du sommet vers le bas.
+let _faceTex = null;
+function faceTexture() {
+  if (_faceTex) return _faceTex;
+  const W = 256, H = 256;
+  const c = document.createElement('canvas');
+  c.width = W; c.height = H;
+  const x = c.getContext('2d');
+  const cx = W * 0.25;              // centre du visage (avant de la tête)
+  const skin = '#e0a685', skinDark = '#c98c68', skinLight = '#f0bd9a';
+  const hairCol = '#7a3218', hairDark = '#5c2410';
+
+  // fond = cheveux (couvre côtés, arrière et sommet)
+  x.fillStyle = hairCol;
+  x.fillRect(0, 0, W, H);
+
+  // ovale du visage (peau) avec dégradé de volume
+  const faceCx = cx, faceCy = 128, faceRx = 46, faceRy = 70;
+  const grd = x.createRadialGradient(faceCx - 10, faceCy - 14, 12, faceCx, faceCy, 74);
+  grd.addColorStop(0, skinLight);
+  grd.addColorStop(0.55, skin);
+  grd.addColorStop(1, skinDark);
+  x.save();
+  x.beginPath();
+  x.ellipse(faceCx, faceCy, faceRx, faceRy, 0, 0, Math.PI * 2);
+  x.clip();
+  x.fillStyle = grd;
+  x.fillRect(faceCx - faceRx, faceCy - faceRy, faceRx * 2, faceRy * 2);
+
+  // ombres de modelé (joues, tempes, mâchoire)
+  x.fillStyle = 'rgba(150,95,65,0.28)';
+  x.beginPath(); x.ellipse(faceCx - 34, faceCy + 6, 14, 30, 0, 0, Math.PI * 2); x.fill();
+  x.beginPath(); x.ellipse(faceCx + 34, faceCy + 6, 14, 30, 0, 0, Math.PI * 2); x.fill();
+  // barbe naissante sur la mâchoire (discrète)
+  x.fillStyle = 'rgba(90,45,25,0.14)';
+  x.beginPath(); x.ellipse(faceCx, faceCy + 44, 32, 22, 0, 0, Math.PI * 2); x.fill();
+  x.restore();
+
+  // implantation des cheveux (front + houppe)
+  x.fillStyle = hairCol;
+  x.beginPath();
+  x.moveTo(faceCx - 48, faceCy - 30);
+  x.quadraticCurveTo(faceCx - 40, faceCy - 78, faceCx, faceCy - 66);   // tempe G -> pic
+  x.quadraticCurveTo(faceCx + 40, faceCy - 78, faceCx + 48, faceCy - 30);
+  x.quadraticCurveTo(faceCx, faceCy - 58, faceCx - 48, faceCy - 30);   // ligne de front (léger pic central)
+  x.fill();
+  x.fillStyle = hairDark;
+  x.fillRect(faceCx - 50, faceCy - 92, 100, 22); // masse au sommet
+
+  // sourcils (auburn, légèrement inclinés)
+  x.strokeStyle = hairDark; x.lineWidth = 6; x.lineCap = 'round';
+  for (const s of [-1, 1]) {
+    x.beginPath();
+    x.moveTo(faceCx + s * 8, faceCy - 22);
+    x.lineTo(faceCx + s * 30, faceCy - 26);
+    x.stroke();
+  }
+
+  // yeux (blanc, iris marron, pupille, reflet)
+  for (const s of [-1, 1]) {
+    const ex = faceCx + s * 19, ey = faceCy - 10;
+    x.fillStyle = '#f4efe8';
+    x.beginPath(); x.ellipse(ex, ey, 11, 6.5, 0, 0, Math.PI * 2); x.fill();
+    x.fillStyle = '#5a3a1e';
+    x.beginPath(); x.arc(ex, ey, 5, 0, Math.PI * 2); x.fill();
+    x.fillStyle = '#1a1008';
+    x.beginPath(); x.arc(ex, ey, 2.4, 0, Math.PI * 2); x.fill();
+    x.fillStyle = '#ffffff';
+    x.beginPath(); x.arc(ex - 1.6, ey - 1.6, 1.2, 0, Math.PI * 2); x.fill();
+    // paupière supérieure
+    x.strokeStyle = 'rgba(120,80,55,0.6)'; x.lineWidth = 2;
+    x.beginPath(); x.ellipse(ex, ey - 2, 11, 6, 0, Math.PI, Math.PI * 2); x.stroke();
+  }
+
+  // nez (arête ombrée + narines)
+  x.strokeStyle = 'rgba(150,95,65,0.35)'; x.lineWidth = 4;
+  x.beginPath(); x.moveTo(faceCx - 3, faceCy - 6); x.lineTo(faceCx - 5, faceCy + 16); x.stroke();
+  x.fillStyle = 'rgba(120,75,50,0.5)';
+  x.beginPath(); x.ellipse(faceCx - 6, faceCy + 18, 3, 2, 0, 0, Math.PI * 2); x.fill();
+  x.beginPath(); x.ellipse(faceCx + 6, faceCy + 18, 3, 2, 0, 0, Math.PI * 2); x.fill();
+  x.fillStyle = 'rgba(240,190,155,0.5)';
+  x.beginPath(); x.ellipse(faceCx, faceCy + 14, 4, 6, 0, 0, Math.PI * 2); x.fill(); // pointe éclairée
+
+  // moustache (guidon épais et sombre) sous le nez
+  x.fillStyle = hairDark;
+  x.beginPath();
+  x.moveTo(faceCx, faceCy + 24);
+  x.quadraticCurveTo(faceCx - 16, faceCy + 22, faceCx - 26, faceCy + 26);
+  x.quadraticCurveTo(faceCx - 38, faceCy + 30, faceCx - 40, faceCy + 20); // pointe G recourbée vers le haut
+  x.quadraticCurveTo(faceCx - 30, faceCy + 34, faceCx, faceCy + 34);      // bas de l'aile G
+  x.quadraticCurveTo(faceCx + 30, faceCy + 34, faceCx + 40, faceCy + 20); // aile D + pointe
+  x.quadraticCurveTo(faceCx + 38, faceCy + 30, faceCx + 26, faceCy + 26);
+  x.quadraticCurveTo(faceCx + 16, faceCy + 22, faceCx, faceCy + 24);
+  x.fill();
+  // reflets/mèches de la moustache
+  x.strokeStyle = hairCol; x.lineWidth = 1.5;
+  for (let i = -3; i <= 3; i++) {
+    x.beginPath();
+    x.moveTo(faceCx + i * 5, faceCy + 25);
+    x.lineTo(faceCx + i * 6.5, faceCy + 32);
+    x.stroke();
+  }
+
+  // bouche (lèvres) sous la moustache
+  x.strokeStyle = '#a85a4a'; x.lineWidth = 3;
+  x.beginPath(); x.moveTo(faceCx - 11, faceCy + 42); x.quadraticCurveTo(faceCx, faceCy + 46, faceCx + 11, faceCy + 42); x.stroke();
+
+  const tex = new THREE.CanvasTexture(c);
+  _faceTex = tex;
+  return tex;
+}
+
 export function buildFarmer() {
   const g = new THREE.Group();
   const skin = mat(0xe4a980);
@@ -688,53 +801,38 @@ export function buildFarmer() {
     g.add(hand);
   }
 
-  // cou + tête
-  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.13, 0.14, 8), skin);
-  neck.position.y = 2.08;
+  // cou + tête (visage peint sur texture)
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.13, 0.16, 8), skin);
+  neck.position.y = 2.06;
   g.add(neck);
-  const head = shadow(new THREE.Mesh(new THREE.SphereGeometry(0.27, 14, 12), skin));
-  head.scale.set(1, 1.12, 1.02);
-  head.position.y = 2.33;
+  const head = shadow(new THREE.Mesh(
+    new THREE.SphereGeometry(0.28, 28, 24),
+    new THREE.MeshLambertMaterial({ map: faceTexture() })
+  ));
+  head.scale.set(0.96, 1.12, 1.0);
+  head.position.y = 2.34;
   g.add(head);
 
-  // cheveux : calotte sur le sommet (dégage le front) + houppe
-  const hairCap = new THREE.Mesh(new THREE.SphereGeometry(0.3, 14, 12, 0, Math.PI * 2, 0, Math.PI * 0.42), hair);
-  hairCap.scale.set(1, 1.1, 1.04);
-  hairCap.position.y = 2.4;
-  g.add(hairCap);
-  const quiff = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.11, 0.12), hair);
-  quiff.position.set(0, 2.56, 0.16);
-  quiff.rotation.x = -0.5;
-  g.add(quiff);
-  // pattes/tempes
-  for (const sx of [-1, 1]) {
-    const sideburn = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.22, 0.12), hair);
-    sideburn.position.set(sx * 0.255, 2.34, 0.06);
-    g.add(sideburn);
-  }
-
-  // moustache (bien visible sous le nez)
-  const stache = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.07, 0.08), hair);
-  stache.position.set(0, 2.22, 0.25);
-  g.add(stache);
-  for (const sx of [-1, 1]) {
-    const tip = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.1, 0.07), hair);
-    tip.position.set(sx * 0.13, 2.19, 0.245);
-    g.add(tip);
-  }
-  // nez
-  const nose = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.1, 0.07), skin);
-  nose.position.set(0, 2.3, 0.27);
+  // volume de cheveux à l'arrière/au sommet (la texture gère le devant)
+  const backHair = new THREE.Mesh(
+    new THREE.SphereGeometry(0.29, 20, 16, 0, Math.PI * 2, 0, Math.PI * 0.62),
+    hair
+  );
+  backHair.scale.set(0.98, 1.1, 1.02);
+  backHair.position.set(0, 2.4, -0.03);
+  backHair.rotation.x = -0.15;
+  g.add(backHair);
+  // nez en relief (discret, par-dessus la texture)
+  const nose = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 6), skin);
+  nose.scale.set(0.8, 1.1, 1.1);
+  nose.position.set(0, 2.325, 0.275);
   g.add(nose);
-
-  // yeux + sourcils (au-dessus de la moustache, sous le front dégagé)
+  // oreilles
   for (const sx of [-1, 1]) {
-    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.032, 8, 6), mat(0x2a2018));
-    eye.position.set(sx * 0.1, 2.37, 0.255);
-    g.add(eye);
-    const brow = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.028, 0.04), hair);
-    brow.position.set(sx * 0.1, 2.42, 0.255);
-    g.add(brow);
+    const ear = new THREE.Mesh(new THREE.SphereGeometry(0.055, 8, 6), skin);
+    ear.scale.set(0.6, 1, 0.8);
+    ear.position.set(sx * 0.27, 2.33, 0.02);
+    g.add(ear);
   }
 
   return g;
