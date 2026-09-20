@@ -2,7 +2,8 @@ import * as THREE from 'three';
 import { terrainHeight, isWater, WATER_LEVEL, ISLAND } from './terrain.js';
 import { buildWorld, SPOTS } from './world.js';
 import { buildAnimals } from './animals.js';
-import { Tractor, Harvester, MixerTruck, Excavator, Boat, Crane, buildFarmer } from './vehicles.js';
+import { Tractor, Harvester, MixerTruck, Excavator, Boat, Crane } from './vehicles.js';
+import { createFarmer, updateFarmerAnim } from './farmer.js';
 import { ui, toast, missions, missionHTML, setupBuildMenu, renderScoreboard } from './ui.js';
 import { createControls } from './controls.js';
 import { audio } from './audio.js';
@@ -288,8 +289,9 @@ addVehicle(new Excavator(), 72, -28, -0.9);
 addVehicle(new Boat(), 140, 48, Math.PI / 2);
 const crane = addVehicle(new Crane(), SPOTS.cranePad.x, SPOTS.cranePad.z, 0);
 
-// ---------- Fermier ----------
-const farmer = buildFarmer();
+// ---------- Fermier (modèle 3D texturé) ----------
+const farmerObj = createFarmer();
+const farmer = farmerObj.group;
 const farmerState = { heading: 0, speed: 0 };
 farmer.position.set(0, terrainHeight(0, 0), 4);
 scene.add(farmer);
@@ -453,7 +455,7 @@ function updateCamera(dt) {
 
 // ---------- Fermier : marche ----------
 function updateFarmer(dt) {
-  if (game.currentVehicle) return;
+  if (game.currentVehicle) { updateFarmerAnim(farmerObj, dt, false); return; }
   farmerState.heading -= input.turn * 2.6 * dt * (input.forward !== 0 ? 1 : 0.6);
   const speed = input.forward * 6;
   const nx = farmer.position.x + Math.sin(farmerState.heading) * speed * dt;
@@ -462,9 +464,9 @@ function updateFarmer(dt) {
     farmer.position.x = nx;
     farmer.position.z = nz;
   }
-  farmer.position.y = terrainHeight(farmer.position.x, farmer.position.z)
-    + (speed !== 0 ? Math.abs(Math.sin(performance.now() * 0.012)) * 0.12 : 0);
+  farmer.position.y = terrainHeight(farmer.position.x, farmer.position.z);
   farmer.rotation.y = farmerState.heading;
+  updateFarmerAnim(farmerObj, dt, Math.abs(speed) > 0.1);
 }
 
 // ---------- Boucle ----------
@@ -512,6 +514,7 @@ const idleInput = { forward: 0, turn: 0 };
 // Accès debug/tests (sans impact sur le jeu)
 window.__game = game;
 window.__farmer = farmer;
+window.__farmerObj = farmerObj;
 window.__enterVehicle = enterVehicle;
 window.__weather = weather;
 window.__market = market;
