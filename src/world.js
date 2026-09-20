@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { WORLD_SIZE, WATER_LEVEL, LAKE, ISLAND, terrainHeight } from './terrain.js';
 import { PENS } from './animals.js';
 import { MARKET } from './market.js';
+import { loadModel, normalizeModel } from './models.js';
 
 // Emplacements clés du monde
 export const SPOTS = {
@@ -445,6 +446,7 @@ export function buildWorld(scene) {
   const crowns = new THREE.InstancedMesh(crownGeo, mat(0x2f6e26), treeCount);
   trunks.castShadow = true; crowns.castShadow = true;
   let placed = 0, tries = 0;
+  const treeXf = []; // transforms partagés (cônes de repli + arbre 3D détaillé)
   const rand = mulberry32(1234);
   while (placed < treeCount && tries < 4000) {
     tries++;
@@ -466,6 +468,7 @@ export function buildWorld(scene) {
     if (Math.hypot(x - PENS.chickens.x, z - PENS.chickens.z) < PENS.chickens.r + 6) continue;
     if (Math.hypot(x - MARKET.x, z - MARKET.z) < MARKET.r + 6) continue;
     const s = 0.8 + rand() * 0.9;
+    treeXf.push({ x, h, z, s, rotY: rand() * Math.PI * 2 });
     m4.makeScale(s, s, s);
     m4.setPosition(x, h + 1.5 * s, z);
     trunks.setMatrixAt(placed, m4);
@@ -476,6 +479,49 @@ export function buildWorld(scene) {
   }
   trunks.count = placed; crowns.count = placed;
   scene.add(trunks); scene.add(crowns);
+
+  // Remplacement par un vrai arbre 3D (public/models/tree.glb) si présent.
+  // On instancie chaque sous-maillage du modèle (1 appel de rendu chacun) et on
+  // réduit le nombre d'arbres, car un arbre détaillé coûte bien plus cher qu'un cône.
+  const MAX_DETAILED_TREES = 90;
+  loadModel('tree').then((m) => {
+    if (!m) return; // pas de fichier -> on garde les cônes
+    const root = normalizeModel(m);
+    root.updateMatrixWorld(true);
+    // récupérer chaque sous-maillage, géométrie figée dans l'espace du modèle
+    const parts = [];
+    root.traverse((o) => {
+      if (o.isMesh) {
+        const g = o.geometry.clone();
+        g.applyMatrix4(o.matrixWorld);
+        parts.push({ geo: g, mat: o.material });
+      }
+    });
+    if (!parts.length) return;
+    const n = Math.min(placed, MAX_DETAILED_TREES);
+    const insts = parts.map(({ geo, mat }) => {
+      const im = new THREE.InstancedMesh(geo, mat, n);
+      im.castShadow = true; im.receiveShadow = true;
+      return im;
+    });
+    const q = new THREE.Quaternion();
+    const up = new THREE.Vector3(0, 1, 0);
+    const pos = new THREE.Vector3();
+    const scl = new THREE.Vector3();
+    const mm = new THREE.Matrix4();
+    for (let i = 0; i < n; i++) {
+      const t = treeXf[i];
+      q.setFromAxisAngle(up, t.rotY);
+      pos.set(t.x, t.h, t.z);
+      scl.setScalar(t.s * 0.62); // modèle mis à l'échelle sur ~10 m -> ~5 à 10 m
+      mm.compose(pos, q, scl);
+      for (const im of insts) im.setMatrixAt(i, mm);
+    }
+    for (const im of insts) { im.instanceMatrix.needsUpdate = true; scene.add(im); }
+    // retirer les cônes de repli
+    scene.remove(trunks); scene.remove(crowns);
+    trunks.geometry.dispose(); crowns.geometry.dispose();
+  });
 
   // ---------- Ferme de départ ----------
   const barn = new THREE.Group();

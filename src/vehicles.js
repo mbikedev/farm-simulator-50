@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { terrainHeight, terrainNormal, WATER_LEVEL } from './terrain.js';
+import { loadModel, normalizeModel } from './models.js';
 
 function mat(color, opts = {}) {
   // Carrosserie : tôle peinte -> léger reflet métallique via l'environnement (IBL)
@@ -149,6 +150,24 @@ export class Vehicle {
     this.drive(dt, input);
   }
 
+  // Remplace le mesh codé à la main par un vrai modèle .glb (si fourni).
+  // headlightArgs = [lx, y, z] pour recréer des phares fonctionnels (le glb n'a
+  // pas de SpotLight). Si le fichier est absent, on garde le mesh codé.
+  useModel(name, headlightArgs) {
+    loadModel(name).then((m) => {
+      if (!m) return; // pas de fichier -> on garde la version codée
+      // retirer toutes les parties codées à la main
+      for (let i = this.mesh.children.length - 1; i >= 0; i--) {
+        this.mesh.remove(this.mesh.children[i]);
+      }
+      this.wheels = [];
+      this.headlightSpots = [];
+      this.lampMat = null;
+      this.mesh.add(normalizeModel(m));
+      if (headlightArgs) this.addHeadlights(...headlightArgs);
+    });
+  }
+
   onAction() { }
 }
 
@@ -208,6 +227,9 @@ export class Tractor extends Vehicle {
     this.addWheel(1.25, 0.7, 1.25, 1.25, -1.4);
     this.addWheel(0.75, 0.5, -1.0, 0.75, 1.7, true);
     this.addWheel(0.75, 0.5, 1.0, 0.75, 1.7, true);
+
+    // Remplace par le vrai modèle 3D si public/models/tractor.glb existe
+    this.useModel('tractor', [0.55, 1.5, 2.7]);
   }
 }
 
