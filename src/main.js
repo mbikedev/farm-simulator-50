@@ -1,4 +1,9 @@
 import * as THREE from 'three';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { terrainHeight, isWater, WATER_LEVEL, ISLAND } from './terrain.js';
 import { buildWorld, SPOTS } from './world.js';
 import { buildAnimals } from './animals.js';
@@ -24,14 +29,49 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+// Rendu cinéma : couleurs sRGB + tone mapping ACES (contraste et couleurs « film »)
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.5, 900);
+
+// ---------- Éclairage par environnement (IBL) ----------
+// Une carte d'environnement procédurale (RoomEnvironment) éclaire les matériaux PBR
+// façon lumière du ciel : reflets doux, meilleur rendu du métal et du verre.
+// Aucun fichier externe → compatible mobile et artefacts (CSP).
+const pmrem = new THREE.PMREMGenerator(renderer);
+const envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environment = envTex;
+scene.environmentIntensity = 1.0; // modulé par le cycle jour/nuit dans la boucle
+
+// ---------- Post-traitement : bloom (halo lumineux cinéma) ----------
+// Repli sûr : si le composer échoue (vieux GPU), on rend en direct.
+let composer = null;
+try {
+  composer = new EffectComposer(renderer);
+  composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  composer.setSize(window.innerWidth, window.innerHeight);
+  composer.addPass(new RenderPass(scene, camera));
+  const bloom = new UnrealBloomPass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    0.28,   // force (subtil, pour ne pas délaver la scène)
+    0.6,    // rayon (halo doux)
+    0.92,   // seuil élevé : seuls le soleil, les phares et reflets vifs rayonnent
+  );
+  composer.addPass(bloom);
+  composer.addPass(new OutputPass()); // applique ACES + sRGB en fin de chaîne
+} catch (e) {
+  console.warn('Post-traitement indisponible, rendu direct :', e);
+  composer = null;
+}
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+  if (composer) composer.setSize(window.innerWidth, window.innerHeight);
 });
 
 // ---------- Monde ----------
@@ -110,7 +150,7 @@ const game = {
     if (state === 'foundation') {
       mesh = new THREE.Mesh(
         new THREE.BoxGeometry(5.7, 0.25, 5.7),
-        new THREE.MeshLambertMaterial({ color: 0x7a5c36 })
+        new THREE.MeshStandardMaterial({ color: 0x7a5c36, roughness: 0.98, metalness: 0.0 })
       );
       mesh.position.set(cx, terrainHeight(cx, cz) + 0.12, cz);
       mesh.receiveShadow = true;
@@ -118,13 +158,13 @@ const game = {
       mesh = new THREE.Group();
       const slab = new THREE.Mesh(
         new THREE.BoxGeometry(5.9, 0.22, 5.9),
-        new THREE.MeshLambertMaterial({ color: 0x46464c })
+        new THREE.MeshStandardMaterial({ color: 0x46464c, roughness: 0.85, metalness: 0.0 })
       );
       slab.receiveShadow = true;
       mesh.add(slab);
       const stripe = new THREE.Mesh(
         new THREE.BoxGeometry(0.4, 0.24, 3.4),
-        new THREE.MeshLambertMaterial({ color: 0xdddccc })
+        new THREE.MeshStandardMaterial({ color: 0xdddccc, roughness: 0.7, metalness: 0.0 })
       );
       mesh.add(stripe);
       mesh.position.set(cx, terrainHeight(cx, cz) + 0.14, cz);
@@ -298,7 +338,7 @@ const game = {
 };
 
 // ---------- Bâtiments constructibles ----------
-function lam(color) { return new THREE.MeshLambertMaterial({ color }); }
+function lam(color) { return new THREE.MeshStandardMaterial({ color, roughness: 0.9, metalness: 0.05 }); }
 
 function buildHouse() {
   const g = new THREE.Group();
@@ -677,6 +717,8 @@ renderer.setAnimationLoop(() => {
   if (started) game.timeOfDay = (game.timeOfDay + dt / DAY_LENGTH) % 1;
   const dayFactor = world.updateDayNight(game.timeOfDay);
   const isNight = dayFactor < 0.35;
+  // l'éclairage d'ambiance (IBL) suit le jour : lumineux à midi, ténu la nuit
+  scene.environmentIntensity = 0.12 + 0.9 * dayFactor;
   const hours = Math.floor(game.timeOfDay * 24);
   const minutes = Math.floor((game.timeOfDay * 24 % 1) * 60);
   const clockText = `${isNight ? '🌙' : '🕐'} ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
@@ -708,5 +750,6 @@ renderer.setAnimationLoop(() => {
   for (const fn of world.updatables) fn(t);
   for (const fn of game.updatables) fn(dt);
   updateCamera(dt);
-  renderer.render(scene, camera);
+  if (composer) composer.render();
+  else renderer.render(scene, camera);
 });

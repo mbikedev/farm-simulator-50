@@ -19,7 +19,8 @@ export const SPOTS = {
 };
 
 function mat(color, opts = {}) {
-  return new THREE.MeshLambertMaterial({ color, ...opts });
+  // Matériau PBR par défaut : mat, non métallique (bois, terre, plastique peint)
+  return new THREE.MeshStandardMaterial({ color, roughness: 0.9, metalness: 0.05, ...opts });
 }
 
 export function buildWorld(scene) {
@@ -121,15 +122,19 @@ export function buildWorld(scene) {
   }
   groundGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
   groundGeo.computeVertexNormals();
-  const ground = new THREE.Mesh(groundGeo, new THREE.MeshLambertMaterial({ vertexColors: true }));
+  const ground = new THREE.Mesh(groundGeo, new THREE.MeshStandardMaterial({
+    vertexColors: true, roughness: 0.96, metalness: 0.0,
+  }));
   ground.receiveShadow = true;
   scene.add(ground);
 
   // ---------- Eau ----------
   const waterGeo = new THREE.CircleGeometry(LAKE.radius + 30, 48);
   waterGeo.rotateX(-Math.PI / 2);
-  const water = new THREE.Mesh(waterGeo, new THREE.MeshLambertMaterial({
-    color: 0x2e7fb8, transparent: true, opacity: 0.82,
+  // eau réfléchissante : faible rugosité -> reflète le ciel via l'environnement (IBL)
+  const water = new THREE.Mesh(waterGeo, new THREE.MeshStandardMaterial({
+    color: 0x2e6fa8, transparent: true, opacity: 0.85,
+    roughness: 0.12, metalness: 0.2, envMapIntensity: 1.4,
   }));
   water.position.set(LAKE.x, WATER_LEVEL, LAKE.z);
   scene.add(water);

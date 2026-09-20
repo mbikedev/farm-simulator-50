@@ -10,7 +10,7 @@ const BASE = { potato: 2, wheat: 3, corn: 4 };
 const LABELS = { potato: 'Aardappel', wheat: 'Tarwe', corn: 'Maïs' };
 const ORDER = ['potato', 'wheat', 'corn'];
 
-function mat(color) { return new THREE.MeshLambertMaterial({ color }); }
+function mat(color) { return new THREE.MeshStandardMaterial({ color, roughness: 0.85, metalness: 0.05 }); }
 
 export function createMarket(scene) {
   const mx = MARKET.x, mz = MARKET.z, my = terrainHeight(mx, mz);

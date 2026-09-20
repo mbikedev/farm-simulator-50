@@ -2,10 +2,16 @@ import * as THREE from 'three';
 import { terrainHeight, terrainNormal, WATER_LEVEL } from './terrain.js';
 
 function mat(color, opts = {}) {
-  return new THREE.MeshLambertMaterial({ color, ...opts });
+  // Carrosserie : tôle peinte -> léger reflet métallique via l'environnement (IBL)
+  return new THREE.MeshStandardMaterial({ color, roughness: 0.5, metalness: 0.35, ...opts });
 }
-const glassMat = new THREE.MeshLambertMaterial({ color: 0x9fd8ff, transparent: true, opacity: 0.55 });
-const tireMat = mat(0x1c1c1e);
+// Verre teinté réfléchissant (cabines)
+const glassMat = new THREE.MeshStandardMaterial({
+  color: 0x9fd8ff, transparent: true, opacity: 0.5,
+  roughness: 0.08, metalness: 0.1, envMapIntensity: 1.6,
+});
+// Caoutchouc : sombre et mat
+const tireMat = new THREE.MeshStandardMaterial({ color: 0x1c1c1e, roughness: 0.95, metalness: 0.0 });
 const rimMat = mat(0xd8c53a);
 
 function shadow(o) { o.castShadow = true; return o; }

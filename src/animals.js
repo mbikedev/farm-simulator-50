@@ -9,7 +9,7 @@ export const PENS = {
   chickens: { x: -12, z: -40, r: 11 }, // basse-cour près de la grange (sans clôture)
 };
 
-function mat(color) { return new THREE.MeshLambertMaterial({ color }); }
+function mat(color) { return new THREE.MeshStandardMaterial({ color, roughness: 0.85, metalness: 0.0 }); }
 function shadow(o) { o.castShadow = true; return o; }
 
 // ---------- Modèles ----------
