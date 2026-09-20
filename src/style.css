@@ -33,6 +33,13 @@ html, body {
   backdrop-filter: blur(4px);
 }
 
+button.hud-pill {
+  pointer-events: auto;
+  cursor: pointer;
+  margin-left: auto;
+}
+button.hud-pill:active { background: rgba(120,200,90,0.5); }
+
 #hud-mission {
   position: absolute;
   top: calc(48px + env(safe-area-inset-top));

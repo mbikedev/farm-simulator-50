@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { terrainHeight } from './terrain.js';
+import { audio } from './audio.js';
 
 // Enclos et zones des animaux
 export const PENS = {
@@ -168,6 +169,7 @@ function makeAnimal(build, pen, speed) {
     timer: 1 + Math.random() * 3,
     tx: 0, tz: 0,
     phase: Math.random() * 10,
+    cryTimer: 3 + Math.random() * 20,
   };
   animal.mesh.position.set(animal.x, terrainHeight(animal.x, animal.z), animal.z);
   animal.mesh.rotation.y = animal.heading;
@@ -225,6 +227,18 @@ export function buildAnimals(scene) {
           const away = Math.atan2(a.x - playerPos.x, a.z - playerPos.z);
           a.tx = a.pen.x + Math.sin(away) * (a.pen.r - 1);
           a.tz = a.pen.z + Math.cos(away) * (a.pen.r - 1);
+          audio.cry('chicken-alarm', dp);
+        }
+      }
+
+      // cris espacés, audibles selon la distance au joueur
+      a.cryTimer -= dt;
+      if (a.cryTimer <= 0) {
+        a.cryTimer = 8 + Math.random() * 22;
+        if (playerPos) {
+          const dist = Math.hypot(a.x - playerPos.x, a.z - playerPos.z);
+          const type = a.pen === PENS.cows ? 'cow' : a.pen === PENS.sheep ? 'sheep' : 'chicken';
+          audio.cry(type, dist);
         }
       }
 

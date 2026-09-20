@@ -5,6 +5,7 @@ import { buildAnimals } from './animals.js';
 import { Tractor, Harvester, MixerTruck, Excavator, Boat, Crane, buildFarmer } from './vehicles.js';
 import { ui, toast, missions, missionHTML, setupBuildMenu } from './ui.js';
 import { createControls } from './controls.js';
+import { audio } from './audio.js';
 
 // ---------- Rendu ----------
 const canvas = document.getElementById('game-canvas');
@@ -425,6 +426,15 @@ let started = false;
 document.getElementById('btn-start').addEventListener('pointerdown', () => {
   document.getElementById('title-screen').style.display = 'none';
   started = true;
+  audio.unlock(); // l'audio doit démarrer sur un geste utilisateur
+});
+// certains navigateurs suspendent l'audio jusqu'au premier geste sur la page
+window.addEventListener('pointerdown', () => { if (started) audio.unlock(); });
+
+const soundBtn = document.getElementById('hud-sound');
+soundBtn.addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  soundBtn.textContent = audio.toggleMute() ? '🔇' : '🔊';
 });
 
 ui.setMoney(game.money);
@@ -452,6 +462,13 @@ renderer.setAnimationLoop(() => {
     updateUnloading(dt);
     updateMissions();
     animals.update(dt, t, game.currentVehicle ? game.currentVehicle.mesh.position : farmer.position);
+    // son du moteur selon le véhicule conduit et son régime
+    const cv = game.currentVehicle;
+    if (cv && !cv.isStatic) {
+      audio.setEngine(cv.kind, Math.min(1, Math.abs(cv.speed) / cv.maxSpeed));
+    } else {
+      audio.setEngine(null, 0);
+    }
   }
   for (const fn of world.updatables) fn(t);
   for (const fn of game.updatables) fn(dt);
