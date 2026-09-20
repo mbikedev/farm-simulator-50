@@ -256,7 +256,9 @@ button.hud-pill:active { background: rgba(120,200,90,0.5); }
 /* ---------- Écran titre ---------- */
 #title-screen {
   position: absolute; inset: 0;
-  background: linear-gradient(160deg, #14320f 0%, #0a1e08 60%, #05130a 100%);
+  background-color: #0a1e08; /* repli si l'image ne charge pas */
+  background-image: linear-gradient(160deg, #14320f 0%, #0a1e08 60%, #05130a 100%);
+  background-size: cover; background-position: center;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   gap: 18px;
@@ -265,6 +267,13 @@ button.hud-pill:active { background: rgba(120,200,90,0.5); }
   text-align: center;
   padding: 20px;
 }
+/* voile sombre au-dessus de l'image de fond pour la lisibilité du texte */
+#title-screen::before {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(6,18,8,0.35) 0%, rgba(6,18,8,0.62) 55%, rgba(4,14,7,0.85) 100%);
+  z-index: -1;
+}
+#title-screen > * { position: relative; }
 #title-screen h1 { font-size: clamp(28px, 7vw, 52px); text-shadow: 0 4px 16px rgba(0,0,0,0.6); }
 #title-screen h1 span { color: #8ce05f; }
 #title-screen p { color: #cfe8c6; font-size: 14px; }

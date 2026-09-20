@@ -1,9 +1,13 @@
 # 🚜 Boerderij Simulator 50
 
+![Boerderij Simulator 50](docs/screenshots/hero.jpg)
+
 Jeu de simulation de conduite de tracteurs en 3D — **interface du jeu en néerlandais** — conçu pour
 **Android d'abord** (via Capacitor), puis iOS. Jouable aussi directement dans un navigateur.
 
-![Ferme](docs/screenshots/boerderij.png)
+> Image de présentation générée à partir des prompts du [press kit](docs/presskit.html).
+
+![Ferme (en jeu)](docs/screenshots/boerderij.png)
 
 ## Contenu du jeu
 
