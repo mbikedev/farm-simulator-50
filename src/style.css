@@ -1,0 +1,286 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #000;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  -webkit-user-select: none; user-select: none;
+  touch-action: none;
+}
+
+#app { position: fixed; inset: 0; }
+#game-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+/* ---------- HUD ---------- */
+#hud { position: absolute; inset: 0; pointer-events: none; }
+
+#hud-top {
+  position: absolute;
+  top: calc(8px + env(safe-area-inset-top));
+  left: 12px; right: 12px;
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+
+.hud-pill {
+  background: rgba(20, 30, 20, 0.75);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  backdrop-filter: blur(4px);
+}
+
+button.hud-pill {
+  pointer-events: auto;
+  cursor: pointer;
+  margin-left: auto;
+}
+button.hud-pill:active { background: rgba(120,200,90,0.5); }
+
+#hud-level {
+  position: absolute;
+  top: calc(48px + env(safe-area-inset-top));
+  left: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+#hud-level-badge {
+  background: linear-gradient(180deg, #ffd97a, #e0a83a);
+  color: #4a2c00;
+  font-weight: 800; font-size: 15px;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid rgba(255,255,255,0.6);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  flex-direction: column; line-height: 1;
+}
+#hud-level-info { display: flex; flex-direction: column; gap: 3px; }
+#hud-level-title {
+  color: #ffe9a8; font-size: 12px; font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+}
+#hud-xp-bar {
+  position: relative;
+  width: 150px; height: 14px;
+  background: rgba(0,0,0,0.55);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 8px;
+  overflow: hidden;
+}
+#hud-xp-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, #7ddf5a, #aef58a);
+  transition: width 0.35s ease;
+}
+#hud-xp-text {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.9);
+}
+#hud-xp-bar.flash { animation: xpflash 0.4s; }
+@keyframes xpflash { 0%,100% { box-shadow: none; } 50% { box-shadow: 0 0 10px 2px #aef58a; } }
+
+#hud-mission {
+  position: absolute;
+  top: calc(96px + env(safe-area-inset-top));
+  left: 12px;
+  max-width: 62vw;
+  background: rgba(0, 60, 20, 0.65);
+  color: #eaffea;
+  border-left: 4px solid #7ddf5a;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+#hud-toast {
+  position: absolute;
+  left: 50%; top: 22%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.78);
+  color: #ffe98a;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  opacity: 0;
+  transition: opacity 0.3s;
+  white-space: nowrap;
+}
+#hud-toast.show { opacity: 1; }
+
+/* ---------- Contrôles tactiles ---------- */
+#touch-controls { position: absolute; inset: 0; pointer-events: none; }
+
+#joystick-zone {
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 45%; height: 55%;
+  pointer-events: auto;
+}
+
+#joystick-base {
+  position: absolute;
+  left: 36px; bottom: calc(36px + env(safe-area-inset-bottom));
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.10);
+  border: 2px solid rgba(255,255,255,0.30);
+}
+
+#joystick-knob {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 54px; height: 54px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.55);
+  transform: translate(-50%, -50%);
+}
+
+#action-buttons {
+  position: absolute;
+  right: 18px; bottom: calc(26px + env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; gap: 12px;
+  pointer-events: auto;
+}
+
+.btn-round {
+  width: 74px; height: 74px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.4);
+  background: rgba(30,40,30,0.65);
+  color: #fff;
+  font-size: 22px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 2px;
+  backdrop-filter: blur(3px);
+}
+.btn-round span { font-size: 10px; font-weight: 700; letter-spacing: 0.4px; }
+.btn-round:active { background: rgba(120,200,90,0.6); }
+
+/* ---------- Menu construction ---------- */
+#build-menu {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(92vw, 480px);
+  max-height: 80vh;
+  overflow-y: auto;
+  background: rgba(18, 26, 18, 0.95);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 16px;
+  padding: 20px;
+  color: #fff;
+  z-index: 20;
+}
+#build-menu h2 { font-size: 18px; margin-bottom: 14px; }
+#build-menu.hidden { display: none; }
+
+.build-item {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+}
+.build-item .bi-name { font-weight: 700; font-size: 14px; }
+.build-item .bi-cost { font-size: 12px; color: #ffd97a; }
+.build-item button {
+  background: #4caf50; color: #fff; border: none;
+  border-radius: 8px; padding: 8px 16px; font-weight: 700;
+}
+.build-item button:disabled { background: #555; color: #999; }
+
+#build-close {
+  width: 100%;
+  background: rgba(255,255,255,0.15); color: #fff;
+  border: none; border-radius: 8px; padding: 10px; font-weight: 700;
+}
+
+/* ---------- Tableau des scores ---------- */
+#scoreboard {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(92vw, 440px);
+  max-height: 82vh; overflow-y: auto;
+  background: rgba(18, 26, 18, 0.96);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 16px;
+  padding: 20px;
+  color: #fff;
+  z-index: 20;
+}
+#scoreboard.hidden { display: none; }
+#scoreboard h2 { font-size: 18px; margin-bottom: 6px; }
+
+.score-hero {
+  text-align: center;
+  background: linear-gradient(180deg, rgba(255,217,122,0.18), rgba(255,217,122,0.04));
+  border: 1px solid rgba(255,217,122,0.4);
+  border-radius: 12px;
+  padding: 12px; margin: 10px 0 16px;
+}
+.score-hero .score-total { font-size: 34px; font-weight: 900; color: #ffd97a; line-height: 1; }
+.score-hero .score-label { font-size: 12px; color: #cbe6bf; margin-top: 4px; }
+.score-hero .score-lvl { font-size: 14px; font-weight: 700; margin-top: 8px; color: #aef58a; }
+
+.score-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 4px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  font-size: 14px;
+}
+.score-row .sr-label { color: #d8e6d0; }
+.score-row .sr-value { font-weight: 800; color: #fff; }
+
+#scoreboard-close {
+  width: 100%; margin-top: 8px;
+  background: rgba(255,255,255,0.15); color: #fff;
+  border: none; border-radius: 8px; padding: 10px; font-weight: 700;
+}
+#btn-newgame {
+  width: 100%; margin-top: 14px;
+  background: rgba(200,80,60,0.35); color: #ffd9d0;
+  border: 1px solid rgba(255,120,100,0.5); border-radius: 8px; padding: 9px; font-weight: 700;
+}
+#btn-newgame:active { background: rgba(200,80,60,0.6); }
+
+/* ---------- Écran titre ---------- */
+#title-screen {
+  position: absolute; inset: 0;
+  background: linear-gradient(160deg, #14320f 0%, #0a1e08 60%, #05130a 100%);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 18px;
+  color: #fff;
+  z-index: 50;
+  text-align: center;
+  padding: 20px;
+}
+#title-screen h1 { font-size: clamp(28px, 7vw, 52px); text-shadow: 0 4px 16px rgba(0,0,0,0.6); }
+#title-screen h1 span { color: #8ce05f; }
+#title-screen p { color: #cfe8c6; font-size: 14px; }
+#btn-start {
+  font-size: 22px; font-weight: 800;
+  padding: 14px 64px;
+  border: none; border-radius: 999px;
+  background: linear-gradient(180deg, #8ce05f, #4c9e2e);
+  color: #0c2405;
+  box-shadow: 0 6px 24px rgba(140, 224, 95, 0.4);
+}
+#btn-start:active { transform: scale(0.97); }
+#title-help {
+  margin-top: 10px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 12px 18px;
+}
+#title-help p { font-size: 12px; line-height: 1.8; text-align: left; }

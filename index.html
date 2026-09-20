@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Boerderij Simulator 50</title>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div id="app">
+    <canvas id="game-canvas"></canvas>
+
+    <!-- HUD -->
+    <div id="hud">
+      <div id="hud-top">
+        <div class="hud-pill" id="hud-money">💶 0 €</div>
+        <div class="hud-pill" id="hud-potatoes">🥔 0 · 🌾 0 · 🌽 0</div>
+        <div class="hud-pill" id="hud-materials">🧱 0</div>
+        <div class="hud-pill" id="hud-vehicle">🚜 Te voet</div>
+        <div class="hud-pill" id="hud-time">🕐 08:24</div>
+        <div class="hud-pill" id="hud-weather">☀️</div>
+        <button class="hud-pill" id="hud-score">📊</button>
+        <button class="hud-pill" id="hud-sound">🔊</button>
+      </div>
+      <div id="hud-level">
+        <div id="hud-level-badge">⭐ 1</div>
+        <div id="hud-level-info">
+          <div id="hud-level-title">Leerling</div>
+          <div id="hud-xp-bar"><div id="hud-xp-fill"></div><span id="hud-xp-text">0 / 80 XP</span></div>
+        </div>
+      </div>
+      <div id="hud-mission"></div>
+      <div id="hud-toast"></div>
+    </div>
+
+    <!-- Contrôles tactiles -->
+    <div id="touch-controls">
+      <div id="joystick-zone">
+        <div id="joystick-base"><div id="joystick-knob"></div></div>
+      </div>
+      <div id="action-buttons">
+        <button class="btn-round" id="btn-action">⚙️<span>Actie</span></button>
+        <button class="btn-round" id="btn-enter">🚜<span>Instappen</span></button>
+        <button class="btn-round" id="btn-build">🔨<span>Bouwen</span></button>
+      </div>
+    </div>
+
+    <!-- Tableau des scores -->
+    <div id="scoreboard" class="hidden">
+      <h2>📊 Scorebord</h2>
+      <div id="scoreboard-body"></div>
+      <button id="btn-newgame">🔄 Nieuw spel (wist voortgang)</button>
+      <button id="scoreboard-close">Sluiten</button>
+    </div>
+
+    <!-- Menu construction -->
+    <div id="build-menu" class="hidden">
+      <h2>🔨 Bouwwerkplaats</h2>
+      <div id="build-items"></div>
+      <button id="build-close">Sluiten</button>
+    </div>
+
+    <!-- Écran titre -->
+    <div id="title-screen">
+      <h1>🚜 Boerderij Simulator <span>50</span></h1>
+      <p>Realistische tractoren · Boten · Fabriek · Bouwen</p>
+      <button id="btn-start">SPELEN</button>
+      <div id="title-help">
+        <p>🕹️ Joystick of pijltjes / WASD om te rijden</p>
+        <p>🚜 « Instappen » (E) bij een voertuig om in te stappen</p>
+        <p>⚙️ « Actie » (spatie) om te oogsten, graven, laden…</p>
+        <p>🔨 « Bouwen » (B) om huizen en tractoren te bouwen</p>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
