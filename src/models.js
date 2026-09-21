@@ -65,12 +65,22 @@ async function applyEmbeddedTextures(scene, arrayBuffer) {
     try { return await createImageBitmap(new Blob([bytes], { type: img.mimeType || 'image/png' })); }
     catch { return null; }
   }));
+  // texture -> index d'image (gère les textures webp via EXT_texture_webp,
+  // où la source est dans l'extension et non dans texture.source)
+  const texSource = (ti) => {
+    if (ti === undefined) return -1;
+    const t = json.textures?.[ti];
+    if (!t) return -1;
+    let s = t.source;
+    if (s === undefined && t.extensions) {
+      s = t.extensions.EXT_texture_webp?.source ?? t.extensions.KHR_texture_basisu?.source;
+    }
+    return s ?? -1;
+  };
   // matériau -> index d'image (via baseColorTexture)
   const matImg = {};
   (json.materials || []).forEach((m, i) => {
-    const ti = m?.pbrMetallicRoughness?.baseColorTexture?.index;
-    const src = ti !== undefined ? json.textures?.[ti]?.source : undefined;
-    matImg[m.name || `mat${i}`] = src !== undefined ? src : -1;
+    matImg[m.name || `mat${i}`] = texSource(m?.pbrMetallicRoughness?.baseColorTexture?.index);
   });
   const texCache = new Map();
   scene.traverse((o) => {
