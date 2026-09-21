@@ -11,6 +11,7 @@ export function createFarmer() {
   const group = new THREE.Group();
   const state = {
     group, model: null, mixer: null, actions: {}, current: null, ready: false,
+    actionPlaying: false, // une animation one-shot (récolte, salut…) est en cours
   };
 
   loadModel('farmer').then((m) => {
@@ -47,6 +48,8 @@ export function createFarmer() {
     for (const clip of (m.animations || [])) actions[clip.name] = mixer.clipAction(clip);
     state.mixer = mixer;
     state.actions = actions;
+    // fin d'une animation one-shot -> on rend la main à idle/marche
+    mixer.addEventListener('finished', () => { state.actionPlaying = false; });
     const idle = pick(actions, ['Idle_9', 'Idle']);
     if (idle) { idle.play(); state.current = idle; }
 
@@ -66,10 +69,29 @@ function pick(actions, names) {
 export function updateFarmerAnim(state, dt, moving) {
   if (!state.mixer) return;
   state.mixer.update(dt);
+  if (state.actionPlaying) return; // laisse l'animation one-shot se terminer
   const want = moving ? pick(state.actions, ['Walking', 'Running']) : pick(state.actions, ['Idle_9', 'Idle']);
   if (want && want !== state.current) {
     if (state.current) state.current.fadeOut(0.2);
     want.reset().fadeIn(0.2).play();
     state.current = want;
   }
+}
+
+// Joue une animation ponctuelle (récolte, salut…) une seule fois, accélérée
+// pour rester nerveuse, puis rend la main à idle/marche.
+export function playFarmerAction(state, names, targetDur = 1.6) {
+  if (!state.mixer) return;
+  const act = pick(state.actions, Array.isArray(names) ? names : [names]);
+  if (!act) return;
+  const clip = act.getClip();
+  act.reset();
+  act.setLoop(THREE.LoopOnce, 1);
+  act.clampWhenFinished = true;
+  act.setEffectiveTimeScale(Math.max(1, clip.duration / targetDur));
+  act.setEffectiveWeight(1);
+  if (state.current && state.current !== act) state.current.fadeOut(0.15);
+  act.fadeIn(0.15).play();
+  state.current = act;
+  state.actionPlaying = true;
 }
