@@ -21,7 +21,9 @@ Images générées avec Midjourney à partir des prompts du press kit.
 | ![Poules en gros plan](docs/screenshots/kippen-closeup.webp) | ![Moissonneuse dans le blé](docs/screenshots/oogst-tarwe.webp) |
 | ![Orage sur la grange](docs/screenshots/onweer-schuur.webp) | ![Animaux au pâturage](docs/screenshots/dieren-weide.webp) |
 | ![Chargement à la fabrique](docs/screenshots/graanwagen-fabriek.webp) | ![Cabine au coucher du soleil](docs/screenshots/cabine-zonsondergang.webp) |
-| ![Le fermier](docs/screenshots/boer-hooivork.webp) | |
+| ![Le fermier](docs/screenshots/boer-hooivork.webp) | ![Intérieur de grange](docs/screenshots/schuur-interieur.webp) |
+| ![Pneu boueux](docs/screenshots/band-modder.webp) | ![Lever de soleil brumeux](docs/screenshots/mist-zonsopgang.webp) |
+| ![Camion-toupie](docs/screenshots/betonmixer.webp) | ![Étal du marché](docs/screenshots/marktkraam.webp) |
 
 <p align="center">
   <img src="docs/screenshots/boer-portret.jpg" alt="Le fermier" width="45%">
