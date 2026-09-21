@@ -500,7 +500,7 @@ export class Boat extends Vehicle {
     this.mesh.add(flag);
     // feu de proue
     this.addHeadlights(0, 1.35, 3.7);
-    this.seat = { x: 0, y: 1.35, z: 0.2, scale: 0.8 };
+    this.seat = { x: 0, y: 0.5, z: -0.6, scale: 0.78 }; // assis dans le cockpit, sur le pont
   }
 
   update(dt, input, game) {
