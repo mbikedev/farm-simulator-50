@@ -8,11 +8,12 @@ const TARGET_HEIGHT = 1.9; // hauteur visée (m)
 const ROT_Y = Math.PI;     // correction d'orientation (le modèle regarde -Z -> on le retourne)
 
 // Pose assise (squelette Mixamo) : plie hanches puis genoux. [os, axe, angle rad]
+// NB : GLTFLoader retire le « : » des noms Mixamo (mixamorig:LeftUpLeg -> mixamorigLeftUpLeg).
 const SEAT_POSE = [
-  ['mixamorig:LeftUpLeg', 'x', -1.45],
-  ['mixamorig:RightUpLeg', 'x', -1.45],
-  ['mixamorig:LeftLeg', 'x', 1.55],
-  ['mixamorig:RightLeg', 'x', 1.55],
+  ['mixamorigLeftUpLeg', 'x', -1.45],
+  ['mixamorigRightUpLeg', 'x', -1.45],
+  ['mixamorigLeftLeg', 'x', 1.55],
+  ['mixamorigRightLeg', 'x', 1.55],
 ];
 
 export function createFarmer() {
@@ -65,11 +66,16 @@ export function createFarmer() {
     }
     // fin d'une animation one-shot -> on rend la main à idle/marche
     mixer.addEventListener('finished', () => { state.actionPlaying = false; });
-    const idle = pick(actions, ['Idle_9', 'Idle']);
-    if (idle) { idle.play(); state.current = idle; }
-
     state.model = model;
     state.ready = true;
+    if (state.seated) {
+      // monté dans un véhicule avant la fin du chargement -> pose assise directe
+      mixer.stopAllAction();
+      applySeat(state, true);
+    } else {
+      const idle = pick(actions, ['Idle_9', 'Idle']);
+      if (idle) { idle.play(); state.current = idle; }
+    }
   });
 
   return state;
@@ -112,24 +118,29 @@ export function playFarmerAction(state, names, targetDur = 1.6) {
   state.actionPlaying = true;
 }
 
+// Applique (ou retire) la flexion des jambes de la pose assise.
+function applySeat(state, on) {
+  for (const [name, axis, ang] of SEAT_POSE) {
+    const b = state.bones[name];
+    if (b && b.userData.restRot) b.rotation[axis] = b.userData.restRot[axis] + (on ? ang : 0);
+  }
+}
+
 // Assoit / relève le personnage (pose manuelle du squelette, sans animation
 // « assise » disponible). À appeler à la montée / descente d'un véhicule.
+// Robuste si appelé avant le chargement du modèle : la pose est réappliquée
+// au chargement (voir createFarmer).
 export function setFarmerSeated(state, seated) {
-  if (!state.model || state.seated === seated) return;
+  if (state.seated === seated) return;
   state.seated = seated;
-  if (seated) {
-    if (state.mixer) state.mixer.stopAllAction();
+  if (seated && state.mixer) {
+    state.mixer.stopAllAction();
     state.current = null;
     state.actionPlaying = false;
-    for (const [name, axis, ang] of SEAT_POSE) {
-      const b = state.bones[name];
-      if (b && b.userData.restRot) b.rotation[axis] = b.userData.restRot[axis] + ang;
-    }
-  } else {
-    for (const [name, axis] of SEAT_POSE) {
-      const b = state.bones[name];
-      if (b && b.userData.restRot) b.rotation[axis] = b.userData.restRot[axis];
-    }
+  }
+  if (!state.model) return; // sera appliqué au chargement
+  applySeat(state, seated);
+  if (!seated) {
     const idle = pick(state.actions, ['Idle_9', 'Idle']);
     if (idle && state.mixer) { idle.reset().fadeIn(0.15).play(); state.current = idle; }
   }
