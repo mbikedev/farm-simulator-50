@@ -7,11 +7,20 @@ import { loadModel } from './models.js';
 const TARGET_HEIGHT = 1.9; // hauteur visée (m)
 const ROT_Y = Math.PI;     // correction d'orientation (le modèle regarde -Z -> on le retourne)
 
+// Pose assise (squelette Mixamo) : plie hanches puis genoux. [os, axe, angle rad]
+const SEAT_POSE = [
+  ['mixamorig:LeftUpLeg', 'x', -1.45],
+  ['mixamorig:RightUpLeg', 'x', -1.45],
+  ['mixamorig:LeftLeg', 'x', 1.55],
+  ['mixamorig:RightLeg', 'x', 1.55],
+];
+
 export function createFarmer() {
   const group = new THREE.Group();
   const state = {
     group, model: null, mixer: null, actions: {}, current: null, ready: false,
     actionPlaying: false, // une animation one-shot (récolte, salut…) est en cours
+    seated: false, bones: {},
   };
 
   loadModel('farmer').then((m) => {
@@ -48,6 +57,12 @@ export function createFarmer() {
     for (const clip of (m.animations || [])) actions[clip.name] = mixer.clipAction(clip);
     state.mixer = mixer;
     state.actions = actions;
+    // os (pose bind) pour la pose assise, capturés avant toute animation
+    model.traverse((o) => { if (o.isBone) state.bones[o.name] = o; });
+    for (const [name] of SEAT_POSE) {
+      const b = state.bones[name];
+      if (b) b.userData.restRot = b.rotation.clone();
+    }
     // fin d'une animation one-shot -> on rend la main à idle/marche
     mixer.addEventListener('finished', () => { state.actionPlaying = false; });
     const idle = pick(actions, ['Idle_9', 'Idle']);
@@ -68,6 +83,7 @@ function pick(actions, names) {
 // À appeler chaque frame : avance le mixer et enchaîne idle <-> marche.
 export function updateFarmerAnim(state, dt, moving) {
   if (!state.mixer) return;
+  if (state.seated) return; // pose assise figée pendant la conduite
   state.mixer.update(dt);
   if (state.actionPlaying) return; // laisse l'animation one-shot se terminer
   const want = moving ? pick(state.actions, ['Walking', 'Running']) : pick(state.actions, ['Idle_9', 'Idle']);
@@ -94,4 +110,27 @@ export function playFarmerAction(state, names, targetDur = 1.6) {
   act.fadeIn(0.15).play();
   state.current = act;
   state.actionPlaying = true;
+}
+
+// Assoit / relève le personnage (pose manuelle du squelette, sans animation
+// « assise » disponible). À appeler à la montée / descente d'un véhicule.
+export function setFarmerSeated(state, seated) {
+  if (!state.model || state.seated === seated) return;
+  state.seated = seated;
+  if (seated) {
+    if (state.mixer) state.mixer.stopAllAction();
+    state.current = null;
+    state.actionPlaying = false;
+    for (const [name, axis, ang] of SEAT_POSE) {
+      const b = state.bones[name];
+      if (b && b.userData.restRot) b.rotation[axis] = b.userData.restRot[axis] + ang;
+    }
+  } else {
+    for (const [name, axis] of SEAT_POSE) {
+      const b = state.bones[name];
+      if (b && b.userData.restRot) b.rotation[axis] = b.userData.restRot[axis];
+    }
+    const idle = pick(state.actions, ['Idle_9', 'Idle']);
+    if (idle && state.mixer) { idle.reset().fadeIn(0.15).play(); state.current = idle; }
+  }
 }

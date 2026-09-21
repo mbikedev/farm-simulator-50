@@ -8,7 +8,7 @@ import { terrainHeight, isWater, WATER_LEVEL, ISLAND } from './terrain.js';
 import { buildWorld, SPOTS } from './world.js';
 import { buildAnimals } from './animals.js';
 import { Tractor, Harvester, MixerTruck, Excavator, Boat, Crane } from './vehicles.js';
-import { createFarmer, updateFarmerAnim, playFarmerAction } from './farmer.js';
+import { createFarmer, updateFarmerAnim, playFarmerAction, setFarmerSeated } from './farmer.js';
 import { ui, toast, missions, missionHTML, setupBuildMenu, renderScoreboard } from './ui.js';
 import { createControls } from './controls.js';
 import { audio } from './audio.js';
@@ -462,6 +462,7 @@ function enterVehicle(v) {
   farmer.rotation.set(0, 0, 0);       // regarde vers l'avant du véhicule
   farmer.scale.setScalar(seat.scale ?? 0.8);
   farmer.visible = true;
+  setFarmerSeated(farmerObj, true); // pose assise au volant
   ui.setVehicle(`${v.emoji} ${v.name}`);
   toast(`${v.emoji} ${v.name}`);
 }
@@ -478,6 +479,7 @@ function exitVehicle() {
     const x = v.mesh.position.x + ox;
     const z = v.mesh.position.z + oz;
     if (terrainHeight(x, z) > WATER_LEVEL + 0.2) {
+      setFarmerSeated(farmerObj, false); // se relève
       scene.add(farmer);              // détache le fermier du véhicule
       farmer.scale.setScalar(1);
       farmer.rotation.set(0, 0, 0);
