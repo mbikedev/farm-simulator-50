@@ -9,7 +9,7 @@ import { EMBEDDED } from './models-embedded.js';
 // Réglages par modèle (échelle cible en mètres de HAUTEUR, rotation, décalage)
 // — ajustés une fois les vrais fichiers fournis.
 const TUNING = {
-  tractor: { height: 3.2, rotY: 0, yOffset: 0 },
+  tractor: { height: 3.2, rotY: Math.PI / 2, yOffset: 0 },
   cow:     { height: 2.0, rotY: 0, yOffset: 0 },
   sheep:   { height: 1.3, rotY: 0, yOffset: 0 },
   chicken: { height: 0.7, rotY: 0, yOffset: 0 },
