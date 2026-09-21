@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { EMBEDDED } from './models-embedded.js';
 
 // Chargement des modèles .glb déposés dans public/models/.
 // Chaque modèle est optionnel : si le fichier est absent (404), on renvoie null
@@ -20,23 +21,97 @@ const TUNING = {
 const loader = new GLTFLoader();
 const cache = new Map();
 
-// Charge un modèle une seule fois (promesse mise en cache).
-// Résout avec { scene, animations, tuning } ou null si absent.
+// data-URL base64 -> ArrayBuffer (pour GLTFLoader.parse, sans réseau)
+function dataUrlToArrayBuffer(dataUrl) {
+  const b64 = dataUrl.slice(dataUrl.indexOf(',') + 1);
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes.buffer;
+}
+
+function markShadows(scene) {
+  scene.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+}
+
+function onLoaded(name, resolve) {
+  return (gltf) => {
+    markShadows(gltf.scene);
+    resolve({ scene: gltf.scene, animations: gltf.animations || [], tuning: TUNING[name] || {} });
+  };
+}
+
+// --- Textures des modèles embarqués (compatible bac à sable web / CSP) ---
+// GLTFLoader.parse charge les textures via une URL blob: récupérée par fetch,
+// que la CSP du bac à sable bloque. On décode donc les images nous-mêmes,
+// directement depuis le binaire glb, avec createImageBitmap (insensible à la CSP).
+async function applyEmbeddedTextures(scene, arrayBuffer) {
+  const dv = new DataView(arrayBuffer);
+  if (dv.getUint32(0, true) !== 0x46546c67) return; // pas un glb
+  let offset = 12, json = null, bin = null;
+  while (offset + 8 <= dv.byteLength) {
+    const len = dv.getUint32(offset, true);
+    const type = dv.getUint32(offset + 4, true);
+    if (type === 0x4e4f534a) json = JSON.parse(new TextDecoder().decode(new Uint8Array(arrayBuffer, offset + 8, len)));
+    else if (type === 0x004e4942) bin = new Uint8Array(arrayBuffer, offset + 8, len);
+    offset += 8 + len;
+  }
+  if (!json || !bin || !json.images) return;
+  const bviews = json.bufferViews || [];
+  const bitmaps = await Promise.all(json.images.map(async (img) => {
+    if (img.bufferView === undefined) return null;
+    const bv = bviews[img.bufferView];
+    const bytes = bin.subarray(bv.byteOffset || 0, (bv.byteOffset || 0) + bv.byteLength);
+    try { return await createImageBitmap(new Blob([bytes], { type: img.mimeType || 'image/png' })); }
+    catch { return null; }
+  }));
+  // matériau -> index d'image (via baseColorTexture)
+  const matImg = {};
+  (json.materials || []).forEach((m, i) => {
+    const ti = m?.pbrMetallicRoughness?.baseColorTexture?.index;
+    const src = ti !== undefined ? json.textures?.[ti]?.source : undefined;
+    matImg[m.name || `mat${i}`] = src !== undefined ? src : -1;
+  });
+  const texCache = new Map();
+  scene.traverse((o) => {
+    if (!o.isMesh) return;
+    for (const mat of (Array.isArray(o.material) ? o.material : [o.material])) {
+      if (!mat) continue;
+      const idx = matImg[mat.name];
+      if (idx === undefined || idx < 0 || !bitmaps[idx]) continue;
+      let tex = texCache.get(idx);
+      if (!tex) {
+        tex = new THREE.Texture(bitmaps[idx]);
+        tex.flipY = false;
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.needsUpdate = true;
+        texCache.set(idx, tex);
+      }
+      mat.map = tex;
+      if (mat.color) mat.color.setScalar(1);
+      mat.needsUpdate = true;
+    }
+  });
+}
+
+// Charge un modèle une seule fois (promesse mise en cache). Résout avec
+// { scene, animations, tuning } ou null si absent.
+// Priorité au modèle EMBARQUÉ (version web publiée, où le bac à sable ne sert
+// pas de .glb) via parse() sans réseau ; sinon fetch du fichier public/models.
 export function loadModel(name) {
   if (cache.has(name)) return cache.get(name);
-  const url = `${import.meta.env.BASE_URL}models/${name}.glb`;
   const p = new Promise((resolve) => {
-    loader.load(
-      url,
-      (gltf) => {
-        gltf.scene.traverse((o) => {
-          if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; }
-        });
+    if (EMBEDDED[name]) {
+      const ab = dataUrlToArrayBuffer(EMBEDDED[name]);
+      loader.parse(ab, '', async (gltf) => {
+        markShadows(gltf.scene);
+        try { await applyEmbeddedTextures(gltf.scene, ab); } catch { /* garde sans texture */ }
         resolve({ scene: gltf.scene, animations: gltf.animations || [], tuning: TUNING[name] || {} });
-      },
-      undefined,
-      () => resolve(null), // fichier absent -> repli sur le mesh codé
-    );
+      }, () => resolve(null));
+    } else {
+      const url = `${import.meta.env.BASE_URL}models/${name}.glb`;
+      loader.load(url, onLoaded(name, resolve), undefined, () => resolve(null));
+    }
   });
   cache.set(name, p);
   return p;
