@@ -1,6 +1,6 @@
 # 🚜 Alioune Boerderij Donk
 
-![Alioune Boerderij Donk](docs/screenshots/hero.jpg)
+![Alioune Boerderij Donk](docs/screenshots/machines-avond.webp)
 
 Jeu de simulation de conduite de tracteurs en 3D — **interface du jeu en néerlandais** — conçu pour
 **Android d'abord** (via Capacitor), puis iOS. Jouable aussi directement dans un navigateur.
