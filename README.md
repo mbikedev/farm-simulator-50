@@ -9,23 +9,11 @@ Jeu de simulation de conduite de tracteurs en 3D — **interface du jeu en néer
 
 ### Galerie de présentation
 
-Images générées avec Midjourney à partir des prompts du press kit.
+Un aperçu ci-dessous — **[📸 voir toute la galerie (26 visuels) →](docs/gallery.md)**.
 
-| | |
-|---|---|
-| ![Vue héroïque](docs/screenshots/hero.jpg) | ![Coucher de soleil](docs/screenshots/hero-sunset.jpg) |
-| ![Tracteur au champ](docs/screenshots/tractor-field.jpg) | ![Arracheuse de pommes de terre](docs/screenshots/rooier.jpg) |
-| ![Grange au coucher du soleil](docs/screenshots/schuur-zonsondergang.jpg) | ![Nuit avec phares](docs/screenshots/nacht-echt.jpg) |
-| ![Récolte au coucher du soleil](docs/screenshots/oogst-avond.webp) | ![Paysage d'automne](docs/screenshots/herfst-veld.webp) |
-| ![Ferme sous la neige](docs/screenshots/winterlandschap.webp) | ![Marché fermier](docs/screenshots/boerenmarkt.webp) |
-| ![Poules en gros plan](docs/screenshots/kippen-closeup.webp) | ![Moissonneuse dans le blé](docs/screenshots/oogst-tarwe.webp) |
-| ![Orage sur la grange](docs/screenshots/onweer-schuur.webp) | ![Animaux au pâturage](docs/screenshots/dieren-weide.webp) |
-| ![Chargement à la fabrique](docs/screenshots/graanwagen-fabriek.webp) | ![Cabine au coucher du soleil](docs/screenshots/cabine-zonsondergang.webp) |
-| ![Le fermier](docs/screenshots/boer-hooivork.webp) | ![Intérieur de grange](docs/screenshots/schuur-interieur.webp) |
-| ![Pneu boueux](docs/screenshots/band-modder.webp) | ![Lever de soleil brumeux](docs/screenshots/mist-zonsopgang.webp) |
-| ![Camion-toupie](docs/screenshots/betonmixer.webp) | ![Étal du marché](docs/screenshots/marktkraam.webp) |
-| ![Barque au coucher du soleil](docs/screenshots/boot-zonsondergang.webp) | ![Vue aérienne des champs](docs/screenshots/luchtfoto-velden.webp) |
-| ![Silos à grains](docs/screenshots/silos.webp) | ![Tracteur sur la colline](docs/screenshots/tractor-heuvel.webp) |
+| | | |
+|---|---|---|
+| ![Coucher de soleil](docs/screenshots/hero-sunset.jpg) | ![Tracteur au champ](docs/screenshots/tractor-field.jpg) | ![Animaux au pâturage](docs/screenshots/dieren-weide.webp) |
 
 <p align="center">
   <img src="docs/screenshots/boer-portret.jpg" alt="Le fermier" width="45%">
