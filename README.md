@@ -19,7 +19,9 @@ Images générées avec Midjourney à partir des prompts du press kit.
 | ![Récolte au coucher du soleil](docs/screenshots/oogst-avond.webp) | ![Paysage d'automne](docs/screenshots/herfst-veld.webp) |
 | ![Ferme sous la neige](docs/screenshots/winterlandschap.webp) | ![Marché fermier](docs/screenshots/boerenmarkt.webp) |
 | ![Poules en gros plan](docs/screenshots/kippen-closeup.webp) | ![Moissonneuse dans le blé](docs/screenshots/oogst-tarwe.webp) |
-| ![Orage sur la grange](docs/screenshots/onweer-schuur.webp) | |
+| ![Orage sur la grange](docs/screenshots/onweer-schuur.webp) | ![Animaux au pâturage](docs/screenshots/dieren-weide.webp) |
+| ![Chargement à la fabrique](docs/screenshots/graanwagen-fabriek.webp) | ![Cabine au coucher du soleil](docs/screenshots/cabine-zonsondergang.webp) |
+| ![Le fermier](docs/screenshots/boer-hooivork.webp) | |
 
 <p align="center">
   <img src="docs/screenshots/boer-portret.jpg" alt="Le fermier" width="45%">
