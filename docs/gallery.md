@@ -16,6 +16,7 @@ ses propres modèles 3D en temps réel.
 | ![Vue aérienne des champs](screenshots/luchtfoto-velden.webp) | ![Tracteur sur la colline](screenshots/tractor-heuvel.webp) |
 | ![Lever de soleil brumeux](screenshots/mist-zonsopgang.webp) | ![Paysage d'automne](screenshots/herfst-veld.webp) |
 | ![Ferme sous la neige](screenshots/winterlandschap.webp) | ![Récolte au coucher du soleil](screenshots/oogst-avond.webp) |
+| ![Machines au coucher du soleil](screenshots/machines-avond.webp) | |
 
 ## 🚜 Machines agricoles
 
@@ -25,6 +26,7 @@ ses propres modèles 3D en temps réel.
 | ![Moissonneuse dans le blé](screenshots/oogst-tarwe.webp) | ![Camion-toupie](screenshots/betonmixer.webp) |
 | ![Chargement à la fabrique](screenshots/graanwagen-fabriek.webp) | ![Silos à grains](screenshots/silos.webp) |
 | ![Pneu boueux](screenshots/band-modder.webp) | ![Cabine au coucher du soleil](screenshots/cabine-zonsondergang.webp) |
+| ![Grue à tour](screenshots/kraan-veld.webp) | ![Pelleteuse](screenshots/graafmachine.webp) |
 
 ## 🐄 Animaux & bâtiments
 

@@ -9,7 +9,7 @@ Jeu de simulation de conduite de tracteurs en 3D — **interface du jeu en néer
 
 ### Galerie de présentation
 
-Un aperçu ci-dessous — **[📸 voir toute la galerie (26 visuels) →](docs/gallery.md)**.
+Un aperçu ci-dessous — **[📸 voir toute la galerie (29 visuels) →](docs/gallery.md)**.
 
 | | | |
 |---|---|---|
