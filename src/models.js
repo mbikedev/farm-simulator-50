@@ -98,21 +98,42 @@ async function applyEmbeddedTextures(scene, arrayBuffer) {
 // { scene, animations, tuning } ou null si absent.
 // Priorité au modèle EMBARQUÉ (version web publiée, où le bac à sable ne sert
 // pas de .glb) via parse() sans réseau ; sinon fetch du fichier public/models.
+function parseEmbedded(name, dataUrl) {
+  const ab = dataUrlToArrayBuffer(dataUrl);
+  return new Promise((resolve) => {
+    loader.parse(ab, '', async (gltf) => {
+      markShadows(gltf.scene);
+      try { await applyEmbeddedTextures(gltf.scene, ab); } catch { /* garde sans texture */ }
+      resolve({ scene: gltf.scene, animations: gltf.animations || [], tuning: TUNING[name] || {} });
+    }, () => resolve(null));
+  });
+}
+
+function fetchModel(name) {
+  const url = `${import.meta.env.BASE_URL}models/${name}.glb`;
+  return new Promise((resolve) => {
+    loader.load(url, onLoaded(name, resolve), undefined, () => resolve(null));
+  });
+}
+
+// Données embarquées : la plupart des modèles dans EMBEDDED ; l'arbre (lourd)
+// dans un chunk séparé chargé à la demande via import dynamique (fichier .js
+// distinct, pour rester sous la limite de taille par fichier).
+async function embeddedData(name) {
+  if (EMBEDDED[name]) return EMBEDDED[name];
+  if (name === 'tree') {
+    try { const m = await import('./models-embedded-tree.js'); return m.TREE || null; }
+    catch { return null; }
+  }
+  return null;
+}
+
+// Charge un modèle une seule fois (promesse mise en cache). Résout avec
+// { scene, animations, tuning } ou null. Priorité au modèle embarqué (version
+// web, parse() sans réseau) ; sinon fetch du fichier public/models.
 export function loadModel(name) {
   if (cache.has(name)) return cache.get(name);
-  const p = new Promise((resolve) => {
-    if (EMBEDDED[name]) {
-      const ab = dataUrlToArrayBuffer(EMBEDDED[name]);
-      loader.parse(ab, '', async (gltf) => {
-        markShadows(gltf.scene);
-        try { await applyEmbeddedTextures(gltf.scene, ab); } catch { /* garde sans texture */ }
-        resolve({ scene: gltf.scene, animations: gltf.animations || [], tuning: TUNING[name] || {} });
-      }, () => resolve(null));
-    } else {
-      const url = `${import.meta.env.BASE_URL}models/${name}.glb`;
-      loader.load(url, onLoaded(name, resolve), undefined, () => resolve(null));
-    }
-  });
+  const p = embeddedData(name).then((data) => data ? parseEmbedded(name, data) : fetchModel(name));
   cache.set(name, p);
   return p;
 }
