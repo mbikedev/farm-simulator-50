@@ -8,7 +8,7 @@ import { terrainHeight, isWater, WATER_LEVEL, ISLAND } from './terrain.js';
 import { buildWorld, SPOTS } from './world.js';
 import { buildAnimals } from './animals.js';
 import { Tractor, Harvester, MixerTruck, Excavator, Boat, Crane } from './vehicles.js';
-import { createFarmer, updateFarmerAnim } from './farmer.js';
+import { createFarmer, updateFarmerAnim, playFarmerAction } from './farmer.js';
 import { ui, toast, missions, missionHTML, setupBuildMenu, renderScoreboard } from './ui.js';
 import { createControls } from './controls.js';
 import { audio } from './audio.js';
@@ -606,6 +606,7 @@ function farmerOnFootAction() {
       game.stats.moneyEarned += prod.price;
       game.awardXP(3, 'animal');
       toast(`${prod.emoji} ${prod.name} +${prod.price} €`);
+      playFarmerAction(farmerObj, ['Collect_Object']); // animation de collecte
     }
     return;
   }
@@ -626,10 +627,12 @@ function farmerOnFootAction() {
     ui.setCrops(game.crops);
     game.awardXP(2, 'harvest');
     toast(`${EMOJI[bestP.type]} +1 met de hand geoogst`);
+    playFarmerAction(farmerObj, ['Pull_Radish']); // animation de récolte
     return;
   }
 
   toast('🤷 Niets te doen hier. Ga naar dieren of een veld.', 1400);
+  playFarmerAction(farmerObj, ['Wave_One_Hand']); // petit salut
 }
 
 // ---------- Fermier : marche ----------
