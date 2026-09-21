@@ -232,7 +232,7 @@ export class Tractor extends Vehicle {
 
     // Remplace par le vrai modèle 3D si public/models/tractor.glb existe
     this.useModel('tractor', [0.55, 1.5, 2.7]);
-    this.seat = { x: 0, y: 1.72, z: -0.4, scale: 0.68 };
+    this.seat = { x: 0, y: 1.44, z: -0.5, scale: 0.66 }; // assis dans la cabine fermée (tête sous le toit)
   }
 }
 
