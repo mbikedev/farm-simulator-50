@@ -123,7 +123,6 @@ Moteur : [Three.js](https://threejs.org/) · Packaging mobile : [Capacitor](http
 
 Modèles importés dans la scène de jeu, sous licence [CC-BY 3.0](https://creativecommons.org/licenses/by/3.0/) :
 
-- 🚜 **Tractor** — *Poly by Google*, via [Poly Pizza](https://poly.pizza/m/5TGoA5N14c5)
 - 🌳 **Big Tree** — *3Donimus*, via [Poly Pizza](https://poly.pizza/m/dNWh762PN-6)
 - 🛖 **Cabin** (grange) — *Poly by Google*, via [Poly Pizza](https://poly.pizza/m/dTSrDa0oz0a)
 - 🏠 **House with driveway** — *Poly by Google*, via [Poly Pizza](https://poly.pizza/m/bnZkUs4qEdG)
