@@ -1,56 +1,23 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-// modèle embarqué en data-URL base64 (le service d'artifacts ne diffuse pas les .glb)
-import farmerData from './assets/farmerModel.js';
-import { MIME as TEX_MIME, DATA as TEX_DATA } from './assets/farmerTexture.js';
+import { loadModel } from './models.js';
 
-// Charge le modèle 3D texturé du fermier (statique, sans rig).
-// Renvoie un THREE.Group tout de suite ; le modèle est ajouté au chargement du .glb.
-// La « marche » est simulée par un léger balancement (le modèle n'a pas d'animation).
+// Personnage joueur : modèle 3D riggé + animé (Meshy), chargé via le système de
+// modèles (fetch en local, embarqué pour la version web). Anime idle / marche.
 
-const TARGET_HEIGHT = 1.95; // hauteur visée (m)
-
-// Décode une chaîne base64 en Uint8Array
-function b64ToBytes(b64) {
-  const bin = atob(b64);
-  const bytes = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  return bytes;
-}
-
-// Décode le glb (évite tout fetch, bloqué par la CSP des artifacts)
-function glbBuffer(dataUrl) {
-  return b64ToBytes(dataUrl.slice(dataUrl.indexOf(',') + 1)).buffer;
-}
-
-// Applique la texture au modèle. GLTFLoader décode l'image via un blob:
-// que la CSP des artifacts bloque -> on la décode nous-mêmes avec
-// createImageBitmap (sur un Blob, sans URL : insensible à la CSP).
-function applyTexture(model) {
-  const blob = new Blob([b64ToBytes(TEX_DATA)], { type: TEX_MIME });
-  createImageBitmap(blob).then((bitmap) => {
-    const tex = new THREE.Texture(bitmap);
-    tex.colorSpace = THREE.SRGBColorSpace;
-    tex.flipY = false; // convention glTF (UV déjà orientées)
-    tex.needsUpdate = true;
-    model.traverse((o) => {
-      if (o.isMesh && o.material) {
-        o.material.map = tex;
-        o.material.color && o.material.color.setScalar(1);
-        o.material.needsUpdate = true;
-      }
-    });
-  }).catch((e) => console.warn('Texture fermier: décodage échoué', e));
-}
+const TARGET_HEIGHT = 1.9; // hauteur visée (m)
+const ROT_Y = Math.PI;     // correction d'orientation (le modèle regarde -Z -> on le retourne)
 
 export function createFarmer() {
   const group = new THREE.Group();
-  const state = { group, model: null, ready: false, bob: 0 };
+  const state = {
+    group, model: null, mixer: null, actions: {}, current: null, ready: false,
+  };
 
-  const onLoad = (gltf) => {
-    const model = gltf.scene;
-    deformArms(model);            // rapproche les bras du corps (modèle sans rig)
-    // échelle + pieds au sol + centrage
+  loadModel('farmer').then((m) => {
+    if (!m) return; // pas de modèle -> le fermier reste invisible (repli minimal)
+    const model = m.scene;
+
+    // échelle + pieds au sol + centrage horizontal
     let box = new THREE.Box3().setFromObject(model);
     const size = box.getSize(new THREE.Vector3());
     model.scale.setScalar(TARGET_HEIGHT / (size.y || TARGET_HEIGHT));
@@ -59,70 +26,50 @@ export function createFarmer() {
     const c = box.getCenter(new THREE.Vector3());
     model.position.x -= c.x;
     model.position.z -= c.z;
+    model.rotation.y = ROT_Y; // regarde l'avant du jeu (+Z)
 
     model.traverse((o) => {
-      if (o.isMesh) {
+      if (o.isMesh || o.isSkinnedMesh) {
         o.castShadow = true;
         o.receiveShadow = true;
-        if (o.material && o.material.map) o.material.map.colorSpace = THREE.SRGBColorSpace;
+        o.frustumCulled = false; // évite que le skinned mesh disparaisse (bbox figée)
+        for (const mat of (Array.isArray(o.material) ? o.material : [o.material])) {
+          if (mat?.emissive) mat.emissive.setScalar(0); // pas de halo émissif
+          if (mat) mat.emissiveIntensity = 0;
+        }
       }
     });
     group.add(model);
-    applyTexture(model);          // texture décodée de façon compatible CSP
-    state.model = model;
-    state.baseY = model.position.y;
-    state.ready = true;
-  };
 
-  // parse() lit le binaire directement (aucun fetch réseau)
-  try {
-    new GLTFLoader().parse(glbBuffer(farmerData), '', onLoad,
-      (err) => console.warn('Parse du modèle fermier échoué:', err));
-  } catch (err) {
-    console.warn('Décodage du modèle fermier échoué:', err);
-  }
+    // animations : idle par défaut, marche quand on bouge
+    const mixer = new THREE.AnimationMixer(model);
+    const actions = {};
+    for (const clip of (m.animations || [])) actions[clip.name] = mixer.clipAction(clip);
+    state.mixer = mixer;
+    state.actions = actions;
+    const idle = pick(actions, ['Idle_9', 'Idle']);
+    if (idle) { idle.play(); state.current = idle; }
+
+    state.model = model;
+    state.ready = true;
+  });
 
   return state;
 }
 
-// Rapproche les bras du corps en faisant pivoter les sommets des bras
-// autour de l'épaule (le modèle est un seul mesh statique, sans squelette).
-function deformArms(model) {
-  const THETA = 0.55, shoulderY = 0.58, sxR = 0.28, thresh = 0.28, band = 0.16;
-  model.traverse((o) => {
-    if (!o.isMesh || !o.geometry?.attributes?.position) return;
-    const p = o.geometry.attributes.position;
-    for (let i = 0; i < p.count; i++) {
-      let x = p.getX(i), y = p.getY(i);
-      const ax = Math.abs(x);
-      if (ax <= thresh || y < -0.4 || y > 0.66) continue; // uniquement les bras
-      const w = Math.min(1, (ax - thresh) / band);
-      const side = x > 0 ? 1 : -1;
-      const px = side * sxR, py = shoulderY;
-      const ang = -side * THETA * w;      // rotation vers l'axe du corps
-      const dx = x - px, dy = y - py;
-      const c = Math.cos(ang), s = Math.sin(ang);
-      p.setX(i, px + dx * c - dy * s);
-      p.setY(i, py + dx * s + dy * c);
-    }
-    p.needsUpdate = true;
-    o.geometry.computeVertexNormals();
-  });
+function pick(actions, names) {
+  for (const n of names) if (actions[n]) return actions[n];
+  return Object.values(actions)[0] || null;
 }
 
-// À appeler chaque frame : léger balancement de marche
+// À appeler chaque frame : avance le mixer et enchaîne idle <-> marche.
 export function updateFarmerAnim(state, dt, moving) {
-  if (!state.model) return;
-  if (moving) {
-    state.bob += dt * 9;
-    state.model.position.y = state.baseY + Math.abs(Math.sin(state.bob)) * 0.06;
-    state.model.rotation.z = Math.sin(state.bob) * 0.03;
-    state.model.rotation.x = 0.08; // léger penché avant
-  } else {
-    state.bob = 0;
-    // respiration très légère au repos
-    state.model.position.y = state.baseY + Math.sin(performance.now() * 0.002) * 0.01;
-    state.model.rotation.z = 0;
-    state.model.rotation.x = 0;
+  if (!state.mixer) return;
+  state.mixer.update(dt);
+  const want = moving ? pick(state.actions, ['Walking', 'Running']) : pick(state.actions, ['Idle_9', 'Idle']);
+  if (want && want !== state.current) {
+    if (state.current) state.current.fadeOut(0.2);
+    want.reset().fadeIn(0.2).play();
+    state.current = want;
   }
 }

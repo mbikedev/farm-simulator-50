@@ -9,7 +9,7 @@
 import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 
-const MAIN = ['tractor', 'cow', 'sheep', 'chicken', 'barn', 'house'];
+const MAIN = ['tractor', 'cow', 'sheep', 'chicken', 'barn', 'house', 'farmer'];
 const FILE = 'src/models-embedded.js';
 const TREE_FILE = 'src/models-embedded-tree.js';
 const STUB = 'export const EMBEDDED = {};\n';
