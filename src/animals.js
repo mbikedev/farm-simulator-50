@@ -4,14 +4,28 @@ import { terrainHeight } from './terrain.js';
 import { audio } from './audio.js';
 import { loadModel, normalizeModel, normalizeObject } from './models.js';
 
+// Cherche un clip d'animation par mot-clé de nom (insensible à la casse).
+function findClip(clips, keys) {
+  for (const k of keys) {
+    const c = clips.find((cl) => (cl.name || '').toLowerCase().includes(k));
+    if (c) return c;
+  }
+  return null;
+}
+
 // Remplace le mesh codé de chaque animal d'un type par un vrai modèle 3D (si présent).
 // Si le modèle porte une animation (ex. vache riggée qui marche), chaque instance
 // reçoit son propre squelette (SkeletonUtils.clone) et son mixer, sinon on partage
 // un simple clone de graphe (statique, plus léger).
+// Deux clips exploités si présents : marche (mouvement) et repos (idle/broute).
+// Un seul clip (vache/mouton) -> il joue en marchant, figé à l'arrêt.
 function applyAnimalModel(list, name) {
   loadModel(name).then((m) => {
     if (!m) return; // pas de fichier -> on garde le mesh codé
-    const animated = (m.animations && m.animations.length > 0);
+    const clips = m.animations || [];
+    const animated = clips.length > 0;
+    const walkClip = animated ? (findClip(clips, ['walk', 'run', 'move']) || clips[0]) : null;
+    const restClip = animated ? findClip(clips, ['idle', 'graze', 'eat', 'peck', 'stand']) : null;
     for (const a of list) {
       for (let i = a.mesh.children.length - 1; i >= 0; i--) a.mesh.remove(a.mesh.children[i]);
       if (animated) {
@@ -28,13 +42,23 @@ function applyAnimalModel(list, name) {
         });
         a.mesh.add(normalizeObject(inner, m.tuning));
         const mixer = new THREE.AnimationMixer(inner);
-        const action = mixer.clipAction(m.animations[0]);
-        action.play();
-        action.time = Math.random() * m.animations[0].duration; // désynchronise les instances
-        action.setEffectiveTimeScale(0);                        // figé tant que l'animal ne marche pas
+        const moveAction = mixer.clipAction(walkClip);
+        moveAction.play();
+        moveAction.time = Math.random() * walkClip.duration; // désynchronise les instances
+        const restAction = restClip && restClip !== walkClip ? mixer.clipAction(restClip) : null;
+        if (restAction) {
+          restAction.play();
+          restAction.time = Math.random() * restClip.duration;
+          restAction.setEffectiveWeight(1);   // au repos par défaut
+          moveAction.setEffectiveWeight(0);
+        } else {
+          moveAction.setEffectiveTimeScale(0); // pas de clip de repos -> figé à l'arrêt
+        }
         a.mixer = mixer;
-        a.walkAction = action;
-        a.walkRate = 0.9 + Math.random() * 0.3;                 // légère variation de cadence
+        a.moveAction = moveAction;
+        a.restAction = restAction;
+        a.moveWeight = 0;                       // poids courant du clip de marche (0..1)
+        a.walkRate = 0.9 + Math.random() * 0.3; // légère variation de cadence
       } else {
         a.mesh.add(normalizeModel(m)); // cloné par animal (statique)
       }
@@ -338,11 +362,20 @@ export function buildAnimals(scene) {
         a.mesh.position.y = terrainHeight(a.x, a.z);
       }
 
-      // Animation squelettique (vache riggée) : jambes qui marchent en mouvement,
-      // figées à l'arrêt. Cadence plus rapide en fuite.
+      // Animation squelettique : marche en mouvement, repos (idle/broute) à
+      // l'arrêt si un tel clip existe, sinon figé. Cadence plus rapide en fuite.
       if (a.mixer) {
         const moving = a.state === 'walk' || a.state === 'flee';
-        a.walkAction.setEffectiveTimeScale(moving ? a.walkRate * (a.state === 'flee' ? 1.8 : 1) : 0);
+        const rate = a.walkRate * (a.state === 'flee' ? 1.8 : 1);
+        if (a.restAction) {
+          // fondu enchaîné marche <-> repos
+          a.moveWeight += ((moving ? 1 : 0) - a.moveWeight) * Math.min(1, dt * 8);
+          a.moveAction.setEffectiveWeight(a.moveWeight);
+          a.restAction.setEffectiveWeight(1 - a.moveWeight);
+          a.moveAction.setEffectiveTimeScale(rate);
+        } else {
+          a.moveAction.setEffectiveTimeScale(moving ? rate : 0);
+        }
         a.mixer.update(dt);
       }
     }
