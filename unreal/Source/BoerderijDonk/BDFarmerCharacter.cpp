@@ -1,10 +1,13 @@
 #include "BDFarmerCharacter.h"
+#include "BDVehicleBase.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
+#include "Components/CapsuleComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "EngineUtils.h"
 
 ABDFarmerCharacter::ABDFarmerCharacter()
 {
@@ -63,6 +66,46 @@ void ABDFarmerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		{
 			EIC->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABDFarmerCharacter::Look);
 		}
+		if (InteractAction)
+		{
+			EIC->BindAction(InteractAction, ETriggerEvent::Started, this, &ABDFarmerCharacter::Interact);
+		}
+	}
+}
+
+void ABDFarmerCharacter::Interact()
+{
+	// Monte dans le véhicule le plus proche à portée (équivalent enterVehicle de main.js).
+	ABDVehicleBase* Best = nullptr;
+	float BestDist = InteractRange;
+	for (TActorIterator<ABDVehicleBase> It(GetWorld()); It; ++It)
+	{
+		const float D = FVector::Dist(It->GetActorLocation(), GetActorLocation());
+		if (D < BestDist)
+		{
+			BestDist = D;
+			Best = *It;
+		}
+	}
+	if (Best)
+	{
+		Best->EnterVehicle(this);
+	}
+}
+
+void ABDFarmerCharacter::SetSeated(bool bSeated)
+{
+	bIsSeated = bSeated;
+	if (bSeated)
+	{
+		GetCharacterMovement()->StopMovementImmediately();
+		GetCharacterMovement()->DisableMovement();
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	else
+	{
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 	}
 }
 
