@@ -162,19 +162,29 @@ export function attachModel(group, name, onDone) {
 // Normalise un modèle chargé : recentré au sol, mis à l'échelle sur une hauteur
 // cible, tourné selon le réglage. Renvoie un Group prêt à poser dans la scène.
 export function normalizeModel(loaded) {
-  const root = new THREE.Group();
   // clone : le même modèle chargé peut servir plusieurs objets (ex. 26 animaux).
   // géométries et matériaux restent partagés (mémoire), seul le graphe est cloné.
-  const inner = loaded.scene.clone(true);
+  return normalizeObject(loaded.scene.clone(true), loaded.tuning);
+}
+
+// Normalise un objet DÉJÀ cloné (utile pour les modèles riggés/animés, clonés
+// via SkeletonUtils pour garder un squelette indépendant par instance).
+// Applique échelle (hauteur cible), recentrage au sol et rotation du réglage.
+export function normalizeObject(inner, tuning) {
+  const root = new THREE.Group();
   root.add(inner);
 
+  // Force la mise à jour des matrices monde : les modèles riggés (Armature Meshy/
+  // Unreal) portent souvent une échelle sur un nœud parent que Box3.setFromObject
+  // ignore si matrixWorld n'est pas à jour -> sinon mesure (et échelle) faussées.
+  inner.updateMatrixWorld(true);
   const box = new THREE.Box3().setFromObject(inner);
   const size = new THREE.Vector3();
   const center = new THREE.Vector3();
   box.getSize(size);
   box.getCenter(center);
 
-  const t = loaded.tuning || {};
+  const t = tuning || {};
   const targetH = t.height || size.y || 1;
   const s = targetH / (size.y || 1);
   inner.scale.setScalar(s);

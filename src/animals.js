@@ -1,16 +1,44 @@
 import * as THREE from 'three';
+import { clone as cloneSkeleton } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { terrainHeight } from './terrain.js';
 import { audio } from './audio.js';
-import { loadModel, normalizeModel } from './models.js';
+import { loadModel, normalizeModel, normalizeObject } from './models.js';
 
 // Remplace le mesh codé de chaque animal d'un type par un vrai modèle 3D (si présent).
+// Si le modèle porte une animation (ex. vache riggée qui marche), chaque instance
+// reçoit son propre squelette (SkeletonUtils.clone) et son mixer, sinon on partage
+// un simple clone de graphe (statique, plus léger).
 function applyAnimalModel(list, name) {
   loadModel(name).then((m) => {
     if (!m) return; // pas de fichier -> on garde le mesh codé
+    const animated = (m.animations && m.animations.length > 0);
     for (const a of list) {
       for (let i = a.mesh.children.length - 1; i >= 0; i--) a.mesh.remove(a.mesh.children[i]);
-      a.mesh.add(normalizeModel(m)); // cloné par animal
-      a.hasModel = true;             // désactive l'animation de tête codée
+      if (animated) {
+        // squelette indépendant par instance (sinon toutes partageraient les mêmes os)
+        const inner = cloneSkeleton(m.scene);
+        inner.traverse((o) => {
+          if (o.isMesh || o.isSkinnedMesh) {
+            o.castShadow = true; o.receiveShadow = true;
+            o.frustumCulled = false; // le skinned mesh a une bbox figée -> ne pas le culler
+            for (const mat of (Array.isArray(o.material) ? o.material : [o.material])) {
+              if (mat?.emissive) { mat.emissive.setScalar(0); mat.emissiveIntensity = 0; } // pas de halo
+            }
+          }
+        });
+        a.mesh.add(normalizeObject(inner, m.tuning));
+        const mixer = new THREE.AnimationMixer(inner);
+        const action = mixer.clipAction(m.animations[0]);
+        action.play();
+        action.time = Math.random() * m.animations[0].duration; // désynchronise les instances
+        action.setEffectiveTimeScale(0);                        // figé tant que l'animal ne marche pas
+        a.mixer = mixer;
+        a.walkAction = action;
+        a.walkRate = 0.9 + Math.random() * 0.3;                 // légère variation de cadence
+      } else {
+        a.mesh.add(normalizeModel(m)); // cloné par animal (statique)
+      }
+      a.hasModel = true;               // désactive l'animation de tête codée
     }
   });
 }
@@ -308,6 +336,14 @@ export function buildAnimals(scene) {
       }
       if (a.state === 'idle') {
         a.mesh.position.y = terrainHeight(a.x, a.z);
+      }
+
+      // Animation squelettique (vache riggée) : jambes qui marchent en mouvement,
+      // figées à l'arrêt. Cadence plus rapide en fuite.
+      if (a.mixer) {
+        const moving = a.state === 'walk' || a.state === 'flee';
+        a.walkAction.setEffectiveTimeScale(moving ? a.walkRate * (a.state === 'flee' ? 1.8 : 1) : 0);
+        a.mixer.update(dt);
       }
     }
   }
