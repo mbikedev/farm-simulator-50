@@ -25,7 +25,7 @@ const TUNING = {
 
 // Décors lourds embarqués dans un chunk séparé (comme l'arbre), pour garder
 // le chunk principal sous la limite de taille de la version web.
-const EXTRA_NAMES = ['coop', 'market', 'potato', 'shed'];
+const EXTRA_NAMES = ['farmer', 'coop', 'market', 'potato', 'shed'];
 
 const loader = new GLTFLoader();
 const cache = new Map();

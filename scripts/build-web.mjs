@@ -9,9 +9,10 @@
 import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 
-const MAIN = ['tractor', 'cow', 'sheep', 'chicken', 'rooster', 'barn', 'house', 'farmer'];
-// Décors lourds : chunk séparé (import dynamique) pour rester sous la limite de taille par fichier.
-const EXTRA = ['coop', 'market', 'potato', 'shed'];
+const MAIN = ['tractor', 'cow', 'sheep', 'chicken', 'rooster', 'barn', 'house'];
+// Modèles lourds (fermier + décors) : chunk séparé (import dynamique) pour rester
+// sous la limite de taille par fichier de la version web.
+const EXTRA = ['farmer', 'coop', 'market', 'potato', 'shed'];
 const FILE = 'src/models-embedded.js';
 const TREE_FILE = 'src/models-embedded-tree.js';
 const EXTRA_FILE = 'src/models-embedded-extra.js';
