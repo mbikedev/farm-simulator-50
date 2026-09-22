@@ -22,6 +22,9 @@ export function createFarmer() {
     group, model: null, mixer: null, actions: {}, current: null, ready: false,
     actionPlaying: false, // une animation one-shot (récolte, salut…) est en cours
     seated: false, bones: {},
+    idleTime: 0,                    // secondes d'inactivité debout
+    idleNext: 8 + Math.random() * 8, // seuil avant la prochaine variante d'idle
+    idleVariant: false,             // variante « souffle + regard autour » en cours
   };
 
   loadModel('farmer').then((m) => {
@@ -64,8 +67,8 @@ export function createFarmer() {
       const b = state.bones[name];
       if (b) b.userData.restRot = b.rotation.clone();
     }
-    // fin d'une animation one-shot -> on rend la main à idle/marche
-    mixer.addEventListener('finished', () => { state.actionPlaying = false; });
+    // fin d'une animation jouée une fois (one-shot OU variante d'idle) -> retour idle/marche
+    mixer.addEventListener('finished', () => { state.actionPlaying = false; state.idleVariant = false; });
     state.model = model;
     state.ready = true;
     if (state.seated) {
@@ -86,17 +89,53 @@ function pick(actions, names) {
   return Object.values(actions)[0] || null;
 }
 
-// À appeler chaque frame : avance le mixer et enchaîne idle <-> marche.
+// À appeler chaque frame : avance le mixer et enchaîne idle <-> marche, avec un
+// « idle vivant » (souffle + regard autour) après quelques secondes d'immobilité.
 export function updateFarmerAnim(state, dt, moving) {
   if (!state.mixer) return;
   if (state.seated) return; // pose assise figée pendant la conduite
   state.mixer.update(dt);
   if (state.actionPlaying) return; // laisse l'animation one-shot se terminer
-  const want = moving ? pick(state.actions, ['Walking', 'Running']) : pick(state.actions, ['Idle_9', 'Idle']);
-  if (want && want !== state.current) {
+
+  if (moving) {
+    // en mouvement : coupe toute variante d'idle et repasse en marche/course
+    state.idleTime = 0;
+    state.idleVariant = false;
+    const want = pick(state.actions, ['Walking', 'Running']);
+    if (want && want !== state.current) {
+      if (state.current) state.current.fadeOut(0.2);
+      want.reset().fadeIn(0.2).play();
+      state.current = want;
+    }
+    return;
+  }
+
+  // à l'arrêt : laisse la variante « souffle + regard » se dérouler si active
+  if (state.idleVariant) return;
+
+  const idle = pick(state.actions, ['Idle_9', 'Idle']);
+  if (idle && idle !== state.current) {
     if (state.current) state.current.fadeOut(0.2);
-    want.reset().fadeIn(0.2).play();
-    state.current = want;
+    idle.reset().fadeIn(0.2).play();
+    state.current = idle;
+    state.idleTime = 0;
+  }
+
+  // accumulateur d'immobilité -> déclenche l'idle vivant
+  state.idleTime += dt;
+  const variant = state.actions['Long_Breathe_and_Look_Around'];
+  if (variant && variant !== state.current && state.idleTime >= state.idleNext) {
+    state.idleTime = 0;
+    state.idleNext = 10 + Math.random() * 10; // prochaine variante dans 10-20 s
+    state.idleVariant = true;
+    variant.reset();
+    variant.setLoop(THREE.LoopOnce, 1);
+    variant.clampWhenFinished = false;
+    variant.setEffectiveTimeScale(1);
+    variant.setEffectiveWeight(1);
+    if (state.current) state.current.fadeOut(0.4);
+    variant.fadeIn(0.4).play();
+    state.current = variant;
   }
 }
 
