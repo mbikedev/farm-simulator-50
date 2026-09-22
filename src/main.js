@@ -383,6 +383,7 @@ function buildShed() {
   const doorOpen = new THREE.Mesh(new THREE.BoxGeometry(3, 2.6, 0.15), lam(0x37424c));
   doorOpen.position.set(0, 1.3, 2.8);
   g.add(doorOpen);
+  attachModel(g, 'shed'); // vrai modèle 3D si présent (sinon garde la remise codée)
   return g;
 }
 

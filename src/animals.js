@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { clone as cloneSkeleton } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { terrainHeight } from './terrain.js';
 import { audio } from './audio.js';
-import { loadModel, normalizeModel, normalizeObject } from './models.js';
+import { loadModel, normalizeModel, normalizeObject, attachModel } from './models.js';
 
 // Cherche un clip d'animation par mot-clé de nom (insensible à la casse).
 function findClip(clips, keys) {
@@ -296,6 +296,7 @@ export function buildAnimals(scene) {
   coop.add(coopDoor);
   coop.position.set(PENS.chickens.x - 6, terrainHeight(PENS.chickens.x - 6, PENS.chickens.z - 4), PENS.chickens.z - 4);
   scene.add(coop);
+  attachModel(coop, 'coop'); // vrai modèle 3D si présent (sinon garde la caisse codée)
 
   const _dir = new THREE.Vector3();
 
