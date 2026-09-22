@@ -58,13 +58,46 @@ Ce dossier contient une **base C++ qui compile** + un **script d'import** de tes
 | `Config/DefaultEngine.ini` | Réglages mobile de base (MobileHDR off, Android arm64/Vulkan) |
 | `Scripts/import_assets.py` | Import automatique des 13 modèles `.glb` |
 
+---
+
+## Phase 3 — Véhicules (fournie ✅)
+
+Classes C++ livrées : `BDVehicleBase` (conduite arcade + suivi du terrain + caméra +
+monter/descendre), `BDTractor` et `BDBoat` (exemples). Le fermier a une action
+**Interact** pour monter, et s'assoit (`bIsSeated` → Anim BP).
+
+### Mise en place dans l'éditeur
+1. **Entrées** (clic droit Content → Input) :
+   - `IA_Drive` (**Axis2D** : Y = gaz/frein, X = direction)
+   - `IA_Exit` (**Digital/bool**), `IA_Interact` (**Digital/bool**)
+   - `IMC_Farmer` : ajoute **E → IA_Interact** (en plus de WASD/souris).
+   - `IMC_Drive` : **WASD/flèches → IA_Drive**, **F/Échap → IA_Exit**.
+2. **Blueprints véhicules** : clic droit → Blueprint Class → cherche `BDTractor` (et `BDBoat`) :
+   - `BP_Tractor` : **Body** → assigne le Static Mesh **tractor** ; monte le **SeatPoint**
+     à la hauteur du siège (le fermier s'attache là — remonte-le ~90 cm pour l'asseoir bien).
+   - Renseigne `DriveMappingContext=IMC_Drive`, `DriveAction=IA_Drive`, `ExitAction=IA_Exit`.
+   - `BP_Boat` : idem, règle **WaterLevel** = Z de ta surface d'eau.
+3. **Fermier** : sur `BP_FarmerCharacter`, renseigne `InteractAction=IA_Interact`.
+4. **Anim BP** (`ABP_Farmer`) : ajoute un état **Seated** qui joue `Chair_Sit_Idle_M`,
+   avec transition « Entry ↔ Seated » pilotée par la variable **bIsSeated**
+   (Get owning pawn → cast BDFarmerCharacter → bIsSeated).
+5. Place un `BP_Tractor` dans le niveau, **Play**, approche-toi → **E** pour monter,
+   conduis (WASD), **F** pour descendre. ✅
+
+> Autres véhicules (moissonneuse, bétonnière, pelle, grue) : même patron —
+> crée une classe C++ enfant de `BDVehicleBase` (ou juste un BP enfant) et règle
+> les stats + le mesh. Les comportements spéciaux (récolte auto, godet, grue)
+> viendront avec leurs phases.
+
+---
+
 ## Prochaines phases (à construire ensuite)
 
-1. **Véhicules** — `BDVehicleBase` (Pawn arcade) + enfants (tracteur, moissonneuse, bateau…), monter/descendre.
+1. ~~**Véhicules**~~ ✅ (base + tracteur + bateau ; monter/descendre + assise)
 2. **Animaux** — `BDAnimal` + AIController (errance, fuite des poules), spawner mixte poules/coqs.
 3. **Cultures & récolte** — champs en InstancedStaticMesh, moissonneuse.
 4. **Économie** — marché (prix variables), usine (déchargement).
 5. **Progression & missions**, **UI (UMG)**, **sauvegarde**, **ambiance** (jour/nuit, audio).
 6. **Contrôles tactiles** + **packaging Android**.
 
-Dis-moi quand la fondation compile chez toi, et j'écris la phase suivante (véhicules).
+Dis-moi quand ça compile chez toi (ou colle-moi une erreur de build), et j'écris la phase animaux.
