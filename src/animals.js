@@ -268,7 +268,10 @@ export function buildAnimals(scene) {
   // Remplacement par de vrais modèles 3D si les fichiers existent
   applyAnimalModel(animals.filter(a => a.type === 'cow'), 'cow');
   applyAnimalModel(animals.filter(a => a.type === 'sheep'), 'sheep');
-  applyAnimalModel(animals.filter(a => a.type === 'chicken'), 'chicken');
+  // basse-cour : mélange de poules et de coqs (~1 coq sur 4)
+  const poultry = animals.filter(a => a.type === 'chicken');
+  applyAnimalModel(poultry.filter((_, i) => i % 4 !== 0), 'chicken');
+  applyAnimalModel(poultry.filter((_, i) => i % 4 === 0), 'rooster');
 
   // Abreuvoir décoratif dans l'enclos des vaches
   const trough = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.5, 1.0), mat(0x7a8288));

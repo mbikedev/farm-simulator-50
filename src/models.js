@@ -13,6 +13,7 @@ const TUNING = {
   cow:     { height: 2.0, rotY: 0, yOffset: 0 },
   sheep:   { height: 1.3, rotY: 0, yOffset: 0 },
   chicken: { height: 0.7, rotY: 0, yOffset: 0 },
+  rooster: { height: 0.8, rotY: 0, yOffset: 0 }, // coq : un peu plus grand que la poule
   tree:    { height: 9.0, rotY: 0, yOffset: 0 },
   barn:    { height: 9.0, rotY: 0, yOffset: 0 },
   house:   { height: 8.0, rotY: 0, yOffset: 0 },
