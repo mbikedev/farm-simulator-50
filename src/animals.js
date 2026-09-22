@@ -13,6 +13,14 @@ function findClip(clips, keys) {
   return null;
 }
 
+// Tous les clips de repos disponibles (idle / broute / gratte…), pour varier
+// le comportement à l'arrêt d'une instance à l'autre.
+const REST_KEYS = ['idle', 'graze', 'scratch', 'eat', 'peck', 'stand'];
+function findRestClips(clips, walkClip) {
+  return clips.filter((cl) => cl !== walkClip &&
+    REST_KEYS.some((k) => (cl.name || '').toLowerCase().includes(k)));
+}
+
 // Remplace le mesh codé de chaque animal d'un type par un vrai modèle 3D (si présent).
 // Si le modèle porte une animation (ex. vache riggée qui marche), chaque instance
 // reçoit son propre squelette (SkeletonUtils.clone) et son mixer, sinon on partage
@@ -25,7 +33,7 @@ function applyAnimalModel(list, name) {
     const clips = m.animations || [];
     const animated = clips.length > 0;
     const walkClip = animated ? (findClip(clips, ['walk', 'run', 'move']) || clips[0]) : null;
-    const restClip = animated ? findClip(clips, ['idle', 'graze', 'eat', 'peck', 'stand']) : null;
+    const restClips = animated ? findRestClips(clips, walkClip) : [];
     for (const a of list) {
       for (let i = a.mesh.children.length - 1; i >= 0; i--) a.mesh.remove(a.mesh.children[i]);
       if (animated) {
@@ -45,7 +53,10 @@ function applyAnimalModel(list, name) {
         const moveAction = mixer.clipAction(walkClip);
         moveAction.play();
         moveAction.time = Math.random() * walkClip.duration; // désynchronise les instances
-        const restAction = restClip && restClip !== walkClip ? mixer.clipAction(restClip) : null;
+        // clip de repos choisi au hasard parmi ceux dispo (idle/broute/gratte)
+        // -> chaque animal a un comportement d'arrêt différent
+        const restClip = restClips.length ? restClips[(Math.random() * restClips.length) | 0] : null;
+        const restAction = restClip ? mixer.clipAction(restClip) : null;
         if (restAction) {
           restAction.play();
           restAction.time = Math.random() * restClip.duration;
