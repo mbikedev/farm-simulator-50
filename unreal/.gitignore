@@ -1,0 +1,14 @@
+# Unreal — dossiers générés (ne pas versionner)
+Binaries/
+Build/
+DerivedDataCache/
+Intermediate/
+Saved/
+.vs/
+*.sln
+*.VC.db
+*.opensdf
+*.sdf
+*.suo
+
+# Content/ contient des .uasset binaires : utilise Git LFS (voir README).
