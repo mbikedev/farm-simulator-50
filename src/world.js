@@ -276,6 +276,7 @@ export function buildWorld(scene) {
   factory.add(sign);
   factory.position.set(fx, fy, fz);
   scene.add(factory);
+  attachModel(factory, 'potato'); // « potato plant » = usine (vrai modèle 3D si présent)
 
   // Fumée de cheminée
   const smokeMat = new THREE.MeshBasicMaterial({ color: 0xdddddd, transparent: true, opacity: 0.4 });

@@ -17,7 +17,15 @@ const TUNING = {
   tree:    { height: 9.0, rotY: 0, yOffset: 0 },
   barn:    { height: 9.0, rotY: 0, yOffset: 0 },
   house:   { height: 8.0, rotY: 0, yOffset: 0 },
+  coop:    { height: 3.4, rotY: 0, yOffset: 0 },   // poulailler flamand
+  market:  { height: 4.6, rotY: 0, yOffset: 0 },   // étal de marché
+  potato:  { height: 17.0, rotY: 0, yOffset: 0 },  // « potato plant » = usine/fabriek
+  shed:    { height: 4.8, rotY: 0, yOffset: 0 },   // remise flamande
 };
+
+// Décors lourds embarqués dans un chunk séparé (comme l'arbre), pour garder
+// le chunk principal sous la limite de taille de la version web.
+const EXTRA_NAMES = ['coop', 'market', 'potato', 'shed'];
 
 const loader = new GLTFLoader();
 const cache = new Map();
@@ -134,6 +142,10 @@ async function embeddedData(name) {
   if (EMBEDDED[name]) return EMBEDDED[name];
   if (name === 'tree') {
     try { const m = await import('./models-embedded-tree.js'); return m.TREE || null; }
+    catch { return null; }
+  }
+  if (EXTRA_NAMES.includes(name)) {
+    try { const m = await import('./models-embedded-extra.js'); return (m.EXTRA && m.EXTRA[name]) || null; }
     catch { return null; }
   }
   return null;

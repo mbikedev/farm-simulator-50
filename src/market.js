@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { terrainHeight } from './terrain.js';
+import { attachModel } from './models.js';
 
 // Marché : prix fluctuants pour chaque culture, stand + panneau d'affichage 3D.
 // Le joueur y vend au prix courant (potentiellement > ou < que le prix fixe usine).
@@ -51,6 +52,7 @@ export function createMarket(scene) {
   stall.position.set(mx, my, mz);
   stall.rotation.y = Math.PI;
   scene.add(stall);
+  attachModel(stall, 'market'); // vrai modèle 3D si présent (sinon garde l'étal codé)
 
   // ---------- Panneau des prix (canvas mis à jour) ----------
   const canvas = document.createElement('canvas');
